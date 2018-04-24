@@ -1,0 +1,225 @@
+﻿@using System.Web.UI.WebControls
+@model EventZone.Models.EditViewModel
+@using EventZone.Helpers
+@{
+    var ListPrivacy = new List<ListItem>
+    {
+        new ListItem {Text = "Public", Value = "0"},
+        new ListItem {Text = "Unlisted", Value = "1"},
+        new ListItem {Text = "Private", Value = "2"}
+    };
+}
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+<link href="~/Content/Event/summernote.css" rel="stylesheet" />
+<style>
+    .note-group-select-from-files {
+        display: none;
+    }
+</style>
+<script src="~/Scripts/Event/summernote.min.js"></script>
+@using (Html.BeginForm("EditEventPost", "Event", FormMethod.Post, new { enctype = "multipart/form-data" }))
+{
+<div class="d_leftside" id="i_info_tab">
+    <!-- Khung chứa Thông tin cơ bản & Description -->
+
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(model => model.eventID)
+        <div class="form-group">
+            <div class="row">
+                <!-- row Title -->
+                <div class="d_criteria">
+                    Title *
+                </div>
+                <div class="d_value">
+                    @Html.TextBoxFor(model => model.Title, new { @class = "form-control", @style = "width:100%" })
+                    @Html.ValidationMessageFor(model => model.Title)
+                </div>
+            </div>
+            <div class="row">
+                <!-- row Date Time -->
+                <div class="d_criteria">
+                    Date & Time *
+                </div>
+                <div class="d_value">
+                    <div class="d_datetime_1">
+                        <div class="form-group">
+                            <div class="input-group date" id="dtpStartTime">
+                                @Html.TextBoxFor(model => model.StartTime, new { @type = "text", @class = "form-control", @placeholder = "from", @id = "i_start_time" })
+                                <span class="input-group-addon">
+                                    <span class="glyphicon glyphicon-calendar"></span>
+                                </span>
+                            </div>
+                            @Html.ValidationMessageFor(model => model.StartTime)
+                        </div>
+                    </div>
+                    <div class="d_datetime_2">
+                        <div class="form-group">
+                            <div class="input-group date" id="dtpEndTime">
+                                @Html.TextBoxFor(model => model.EndTime, new { @type = "text", @class = "form-control", @placeholder = "to", @id = "i_end_time" })
+                                <span class="input-group-addon">
+                                    <span class="glyphicon glyphicon-calendar"></span>
+                                </span>
+                            </div>
+                            @Html.ValidationMessageFor(model => model.EndTime)
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row b" id="LocationDiv">
+                <div id="LocationInput-@Model.eventID">
+                    @{
+        var index = 0;
+        foreach (var item in Model.Location)
+        {
+            <div id="wrapper">
+
+                <div class="d_criteria">
+                    @if (index == 0)
+                    {
+                        <text>Location* </text>
+                    }
+                </div>
+               
+                    <div class="d_textbox col-lg-8 col-lg-offset-3">
+                        @Html.TextBoxFor(model => model.Location[index].LocationName, new { @class = "LocationInput form-control", @onfocus = "searchLocation(this)", @id = String.Format("Location-{0}-{1}", Model.eventID, index) })
+                        @Html.HiddenFor(model => model.Location[index].Longitude, new { @id = String.Format("Longitude-{0}-{1}", Model.eventID,index) })
+                        @Html.HiddenFor(model => model.Location[index].Latitude, new { @id = String.Format("Lattitude-{0}-{1}", Model.eventID,index) })
+                    </div>
+                    <div class="d_btn_plus col-lg-1">
+                        @if (index == 0)
+                        {
+                            <button type="button" class="btn btn-primary d_btn_add_loc" id="btnAddLocation" onclick="AddLocation(@Model.eventID)">
+                                <span class="glyphicon glyphicon-plus"></span>
+                            </button>
+                        }
+                        else
+                        {
+                            <button type="button" id="btnRemove-@Model.eventID-@index" class="btn btn-danger btnRemoveLocation" onclick="RemoveLocation(@Model.eventID,@index)">
+                                <span class="glyphicon glyphicon-remove"></span>
+                            </button>
+                        }
+                    </div>
+                
+            </div>
+                        index++;
+        }
+                    }
+                    @Html.ValidationMessageFor(model => model.Location)
+                </div>
+            </div>
+            <div class="row b">
+                <!-- row Privacy -->
+                <div class="d_criteria">
+                    Privacy *
+                </div>
+                <div class="d_value">
+                    @Html.DropDownList("Privacy", new SelectList(ListPrivacy, "Value", "Text"), new { @class = "form-control" })
+                    @Html.ValidationMessageFor(model => model.Privacy)
+                </div>
+            </div>
+        </div>
+    
+</div>
+
+<div class="d_rightside" id="i_info_tab">
+    <!-- Khung Description -->
+    <div class="row">
+        <!-- row Description & Save button -->
+        <div class="d_criteria">
+            Description
+        </div>
+        <div class="d_value">
+            <div class="form-group">
+                <div id="i_btn_save">
+                    <input type="submit" id="btnSubmit" class="btn btn-success" value="Save" />
+                </div>
+            </div>
+        </div>
+    </div>
+        <div class="form-group">
+            <!-- row Description -->
+            <div id="alerts"></div>
+            <div class="d_value" id="editor" style="z-index: -1"></div>
+            @Html.HiddenFor(model => model.Description, new { @id = "event-description" })
+            @Html.ValidationMessageFor(model => model.Description)
+        </div>
+</div>
+        }
+
+
+<script src="~/Scripts/Event/prettify-1.0.min.js"></script>
+<script src="~/Scripts/Event/Edit.js"></script>
+
+
+<script>
+    function AddLocation(eventID) {
+        var length = $("input[id^=Location-" + eventID + "-]").length;
+        $("#LocationInput-"+eventID).append("<div id=\"wrapper\">" +
+            "<div class=\"col-lg-8 col-lg-offset-3\">" +
+            "<input type=\"text\" name=\"Location[" + length + "].LocationName\" id=\"Location-" + eventID + "-" + length + "\" class=\"LocationInput form-control\" onfocus=\"searchLocation(this)\" />" +
+            "<input type=\"hidden\" data-val=\"true\" data-val-number=\"The field Longitude must be a number.\" data-val-required=\"The Longitude field is required.\" name=\"Location[" + length + "].Longitude\" id=\"Longitude-" + eventID + "-" + length + "\"  class=\"LongitudeInput\" />" +
+            "<input type=\"hidden\" data-val=\"true\" data-val-number=\"The field Lattitude must be a number.\" data-val-required=\"The Lattitude field is required.\" name=\"Location[" + length + "].Latitude\" id=\"Lattitude-" + eventID + "-" + length + "\" class=\"LangitudeInput\" />" +
+            "</div>" +
+            "<div class=\"col-lg-1\">" +
+            "<button type=\"button\" onclick=\"RemoveLocation("+eventID+","+length+")\" id=\"btnRemove-" + eventID + "-" + length + "\"class=\"btn btn-danger btnRemoveLocation glyphicon glyphicon-remove\"></button>" +
+            "</div>" +
+            "</div>");
+    }
+    function RemoveLocation(eventID,index) {
+            $('#btnRemove-'+eventID+"-"+index).parent("div").parent("div").hide();
+            document.getElementById("Location-"+eventID+"-"+index).value = "Remove Location";
+       
+    }
+</script>
+<script>
+    //Location Map
+    var autocomplete = "";
+    var number = "";
+    var eventID = "";
+    function initAutocomplete() {
+        // Create the autocomplete object, restricting the search to geographical
+        // location types.Req
+        autocomplete = new google.maps.places.Autocomplete(
+        (document.getElementById('Location-'+eventID+"-" + number)),
+        { types: [] });
+
+        // When the user selects an address from the dropdown, populate the address
+        // fields in the form.
+        autocomplete.addListener('place_changed', getCoordinates);
+        google.maps.event.addDomListener(input, 'keydown', function (e) {
+
+            if (e.keyCode === 13 && !e.triggered) {
+                google.maps.event.trigger(this, 'keydown', { keyCode: 40 })
+                google.maps.event.trigger(this, 'keydown', { keyCode: 13, triggered: true })
+            }
+        });
+    }
+
+    // [START region_fillform]
+    function getCoordinates() {
+        // Get the place details from the autocomplete object.
+        var place = autocomplete.getPlace();
+        document.getElementById('Longitude-'+eventID+"-" + number).value = place.geometry.location.lng();
+        document.getElementById('Lattitude-'+eventID+"-" + number).value = place.geometry.location.lat();
+        //$("#i_location_1").empty();
+        //$('[id^=Location-]').each(function (i, item) {
+        //    var x = $(item).val();
+        //    if (x.toString() != "Remove Location")
+        //        $("#i_location_1").append(new Option($(item).val(), $(item).val(), true, true));
+        //});
+    }
+    function enterFocus(textfield) {
+        textfield.keypress(function (event) {
+            if ((event.keyCode) == 13) {
+
+            }
+        })
+    }
+    function searchLocation(x) {
+        var LocationID = $(x).attr('id');
+        var locationArray = LocationID.split("-");
+        eventID = locationArray[1];
+        number = locationArray[2];
+        initAutocomplete();
+    }
+</script>

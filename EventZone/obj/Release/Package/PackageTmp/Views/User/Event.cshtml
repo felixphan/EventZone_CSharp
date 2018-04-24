@@ -1,0 +1,319 @@
+﻿@model EventZone.Models.User
+@using EventZone.Models
+@using EventZone.Helpers
+@{
+    ViewBag.Title = "Event";
+    User curUser = UserHelpers.GetCurrentUser(Session);
+    User viewingUser = Model as User;
+    if (curUser == null && viewingUser == null) {
+        Response.Redirect("~/Home");
+    }
+    bool isOwner= false;
+    if(curUser==viewingUser){
+        isOwner=true;
+    }
+}
+<link href="~/Content/User/myCSS_u_m_e.css" rel="stylesheet"/>
+<link href="~/Content/Event/myCSS_edit_event.css" rel="stylesheet"/>
+<link href="https://netdna.bootstrapcdn.com/font-awesome/3.0.2/css/font-awesome.css" rel="stylesheet">
+<link href="~/Content/Event/bootstrap-datetimepicker.min.css" rel="stylesheet" />
+
+<div class=" d_left_side d_style_of_tabs">
+    <ul class="nav nav-tabs" id="event-tab">
+        <li class="li-tab active"><a href="#i_tab_event" data-toggle="tab">Events (@UserDatabaseHelper.Instance.CountOwnedEvent(viewingUser.UserID, isOwner))</a></li>
+        @if (isOwner)
+        {
+            <li class="li-tab"><a href="#i_tab_report" data-toggle="tab">Pending reported event (@UserDatabaseHelper.Instance.GetAllEventHasReports(curUser.UserID).Count)</a></li>
+        }
+        <li class="d_trick"></li>
+        <li class="slider_event"></li>
+    </ul>
+    <div class="tab-content i_tab_event">
+        <!-- Khung chứa Events -->
+        <div class="tab-pane active" id="i_tab_event">
+            <input type="text" placeholder="Enter Event Name" id="filter-event" class="form-control"/>    
+            <div class="d_events_cover scroll-content" id="event-cover">
+                @if (UserDatabaseHelper.Instance.CountOwnedEvent(viewingUser.UserID, isOwner) > 0)
+                {
+                    @Html.Action("PagingEventManage", "User", new { userID = viewingUser.UserID, page = 1, isOwner = isOwner })
+                }
+            </div>
+        </div>
+        @if (isOwner)
+        {
+            <div class="tab-pane" id="i_tab_report">
+                <input type="text" placeholder="Enter Event Name" id="filter-report" class="form-control" />  
+                <div class="d_events_cover scroll-content" id="report-cover" style="">
+                    @if (UserDatabaseHelper.Instance.GetAllEventHasReports(curUser.UserID).Count > 0)
+                    {
+                        @Html.Action("PagingReportManage", "User", new { page = 1 })
+                    }
+                </div>
+            </div>
+        }
+        <!-- Khung chứa Reported Event -->
+    </div>
+</div>
+
+<div class="d_right_side d_style_of_tabs">
+    <ul class="nav nav-tabs" id="i_stat_tab">
+        <li class="li-tab active"><a href="#i_tab_stat" data-toggle="tab">Statistics</a></li>
+        <li class="d_expand"><span class="glyphicon glyphicon-fullscreen"></span></li>
+        <li class="d_trick"></li>
+        <li class="slider_2"></li>
+    </ul>
+    <div class="tab-content d_tab_stat">
+        <!-- Khung chứa User info -->
+        <div class="tab-pane active" id="i_tab_stat">
+            <div class="d_stat_cover">
+                <div class="d_each_stat">
+                    <div class="d_number">
+                        @UserDatabaseHelper.Instance.CountOwnedEvent(viewingUser.UserID, isOwner)
+                    </div>
+                    <div class="d_number_info">
+                        Events
+                    </div>
+                </div>
+                <div class="d_each_stat">
+                    <div class="d_number">
+                        @UserDatabaseHelper.Instance.CountTotalView(viewingUser.UserID, isOwner)
+                    </div>
+                    <div class="d_number_info">
+                        Total views
+                    </div>
+                </div>
+                <div class="d_each_stat">
+                    <div class="d_number">
+                        @UserDatabaseHelper.Instance.CountTotalLike(viewingUser.UserID, isOwner)
+                    </div>
+                    <div class="d_number_info">
+                        Total likes
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function LockEvent(eventID) {
+        $.ajax({
+            url: "/Admin/LockEvent",
+            type: "POST",
+            dataType: "json",
+            data: { eventID: eventID, reason: "I dont want your event in my website xD" },
+            success: function (data) {
+                if (data.state == 0) {
+                    errorShow(data.error, data.message)
+                } else {
+                    $("#lockUnlockDiv-" + eventID).empty();
+                    $("#lockUnlockDiv-" + eventID).prepend('<button class="btn btn-danger btn-xs" onclick="UnlockEvent('+eventID+')" id="lockUnlock-'+eventID+'">Unlock</button>')
+                }
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log(jqXHR);
+                console.log(textStatus);
+                console.log(errorThrown);
+            }
+        })
+    }
+    //unlockEvent
+    function UnlockEvent(eventID) {
+        $.ajax({
+            url: "/Admin/UnlockEvent",
+            type: "POST",
+            dataType: "json",
+            data: { eventID: eventID },
+            success: function (data) {
+                if (data.state == 0) {
+                    errorShow(data.error, data.message)
+                } else {
+                    $("#lockUnlockDiv-" + eventID).empty();
+                    $("#lockUnlockDiv-" + eventID).prepend('<button class="btn btn-success btn-xs" onclick="LockEvent(' + eventID + ')" id="lockUnlock-' + eventID + '">Lock</button>')
+                }
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log(jqXHR);
+                console.log(textStatus);
+                console.log(errorThrown);
+            }
+        })
+    }
+</script>
+<script>
+    function SendAppeal(eventID) {
+        var contentAppeal = $("#appeal-content_"+eventID).val();
+        if (eventID == null || eventID == "") {
+            $(".modal").modal("hide");
+            errorShow("error","Could not found event!")
+        } else if (contentAppeal == null || contentAppeal == ""||contentAppeal.length<20) {
+            $(".modal").modal("hide");
+            errorShow("Error","Reason appeal must content more than 20 characters.!")
+        }else {
+            $.ajax({
+                url: "/User/Appeal",
+                type: "post",
+                dataType: "json",
+                data: { eventID: eventID, content: contentAppeal },
+                success: function (data) {
+                    if (data.state == 0) {
+                        $(".modal").modal("hide");
+                        errorShow(data.error,data.message)
+                    }else {
+                        $(".modal").modal("hide");
+                        errorShow("Sending appeal success","Your appeal has been sent and current being reviewed! Thank for contacting with us")
+                       
+                        $("#pannel-button-appeal-"+data.eventID).html("<p>Your appeal has been sent and being reviewd. It take about 2-4 days. Thank you for contact with us</p>")
+                    }
+                },
+                error: function(){
+                    $(".modal").modal("hide");
+                    errorShow("Error Connect to server","Can not connect to server! Please try again later")
+                }
+            })
+        }
+    }
+</script>
+
+<!-- scroll event-cover -->
+<script>
+    var pageEvent = 2;
+    var pageReport = 2;
+    //set delay time
+    var delay = (function () {
+        var timer = 0;
+        return function (callback, ms) {
+            clearTimeout(timer);
+            timer = setTimeout(callback, ms);
+        };
+    })();
+    //filter event
+    $('#filter-event').change(function () {
+        delay(function () {
+            pageEvent = 1;
+            $("#event-r").empty();
+            $.ajax({
+                url: "/User/PagingEventManage",
+                type: "post",
+                dataType: "html",
+                data: { userID: '@viewingUser.UserID', page: pageEvent, isOwner: '@isOwner',keyword:$("#filter-event").val() },
+                success: function (data) {
+                    $(".loading").remove();
+                    $("#event-cover").empty();
+                    $("#event-cover").append(data);
+                    pageEvent = pageEvent + 1;
+                },
+                error: function () {
+                    $(".loading").remove();
+
+                }
+            })
+        }, 500);
+    });
+    //filter report
+    $('#filter-report').change(function () {
+        delay(function () {
+            pageReport = 1;
+            $.ajax({
+                url: "/User/PagingReportManage",
+                type: "post",
+                dataType: "html",
+                data: { page: pageReport, keyword:$("#filter-report").val() },
+                success: function (data) {
+                    $(".loading").remove();
+                    $("#report-cover").empty();
+                    $("#report-cover").append(data);
+                    pageReport = pageReport + 1;
+                },
+                error: function () {
+                    $(".loading").remove();
+                }
+            })
+        }, 500);
+    });
+
+    //scroll event
+    $(document).ready(function () {
+        $('#event-cover').bind('scroll', EventScroll);
+    });
+  
+    function EventScroll(e) {
+        var elem = $(e.currentTarget);     
+        if ((elem.innerHeight() + elem.scrollTop()) >= elem[0].scrollHeight) {
+            $('#event-cover').unbind('scroll');
+            $.ajax({
+                url: "/User/PagingEventManage",
+                type: "post",
+                dataType: "html",
+                data: { userID: '@viewingUser.UserID', page: pageEvent, isOwner: '@isOwner', keyword: $("#filter-event").val() },
+                success: function (data) {
+                    $(".loading").remove();
+                    $("#event-cover").append(data);
+                    pageEvent = pageEvent + 1;
+                    $('#event-cover').bind('scroll', EventScroll);
+                },
+                error: function () {
+                    $(".loading").remove();
+                }
+            })
+        }
+    }
+
+    //scroll report-cover
+    $(document).ready(function () {
+        $('#report-cover').bind('scroll', ReportScroll);
+    });
+
+    function ReportScroll(e) {
+        var elem = $(e.currentTarget);
+        if ((elem.innerHeight() + elem.scrollTop()) >= elem[0].scrollHeight) {
+            $.ajax({
+                url: "/User/PagingReportManage",
+                type: "post",
+                dataType: "html",
+                data: { page: pageReport, keyword: $("#filter-report").val() },
+                success: function (data) {
+                    $(".loading").remove();
+                    $("#report-cover").append(data);
+                    pageReport = pageReport + 1;
+                },
+                error: function () {
+                    
+                }
+            })
+        }
+    }
+</script>
+
+<!-- Hiệu ứng chạy border dưới Tabs -->
+<script>
+    $("#event-tab li").click(function(e) {
+        if ($(this).hasClass('slider')) {
+            return;
+        }
+        var whatTab = $(this).index();
+        var howFar = 250 * whatTab;
+        $(".slider_event").css({
+            left: howFar + "px"
+        });
+        $(".ripple").remove();
+        var posX = $(this).offset().left,
+            posY = $(this).offset().top,
+            buttonWidth = $(this).width(),
+            buttonHeight = $(this).height();
+        $(this).prepend("<span class='ripple'></span>");
+        if (buttonWidth >= buttonHeight) {
+            buttonHeight = buttonWidth;
+        } else {
+            buttonWidth = buttonHeight;
+        }
+        var x = e.pageX - posX - buttonWidth / 2;
+        var y = e.pageY - posY - buttonHeight / 2;
+        $(".ripple").css({
+            width: buttonWidth,
+            height: buttonHeight,
+            top: y + 'px',
+            left: x + 'px'
+        }).addClass("rippleEffect");
+    });
+</script>

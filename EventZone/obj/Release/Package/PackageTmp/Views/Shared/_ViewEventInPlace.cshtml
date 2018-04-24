@@ -1,0 +1,24 @@
+﻿@model IEnumerable<EventZone.Models.ViewThumbEventModel>
+
+@if (Model != null)
+{
+    foreach (var item in Model)
+    {
+        @Html.Partial("_LocationEvent", item)
+    }
+}
+<script>
+    @if (Model != null) { 
+       
+       <text>
+    $("#id-number-result").text('@Model.Count()')
+     </text>
+   }
+   else { 
+       <text>
+    $("#id-number-result").text('0');
+    </text>
+   }
+   
+
+</script>

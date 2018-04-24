@@ -1,0 +1,82 @@
+﻿/*************************************************** Thêm ***/
+
+/*************************************************** s?a CSS BOOTSTRAP ***/
+
+/*************************************************** Bao h?t ph?n chính ***/
+
+/*************************************************** Div ch?a 3 tabs + SORT BY ***/
+.d_search_panel{
+    background-color: #fff;
+    height: 500px;
+    width: 200px;
+    position: fixed;
+    right: 0;
+    z-index: 10;
+}
+.d_search_panel div{
+    float: left;
+}
+.d_search_panel .d_arrow{
+    width: 40px;
+    font-size: x-large;
+    background: #E65926;
+    height: 500px;
+    padding: 40px 0 0 8px;
+}
+.d_search_panel .d_arrow .glyphicon{
+    color: #fff;
+    background-color: #E65926;
+}
+.d_search_panel .d_filter,
+.d_search_panel .d_3_tabs{
+    width: 160px;
+}
+.d_search_panel .d_3_tabs .d_item{
+    height: 40px;
+    width: 160px;
+}
+.d_search_panel .d_title{
+    float: left;
+    height: 30px;
+    width: 100%;
+    padding: 5px;
+    text-align: center;
+    color: white;
+    background-color: rgba(230,89,38,.5);
+}
+.d_search_panel .d_3_tabs .d_item button{
+    height: 100%;
+    width: 100%;
+    padding: 0 10px;
+    text-align: left;
+    background-color: white;
+    border: 0;
+}
+.d_search_panel .d_3_tabs .d_item button:hover{
+    background-color: rgba(230, 89, 38, .1);
+}
+
+/******************************************** Div ch?a 3 tabs >> SORT by ***/
+.d_search_panel .d_filter .d_criteria{
+    width: 100%;
+}
+.d_search_panel .d_filter .radio{
+    width: 100%;
+    padding: 5px 10px;
+}
+
+/*************************************************** Khung k?t qu?  ***/
+
+/********************************************** K?t qu? Event **/
+.d_each_event {
+    width: 31%;
+    height: 200px;
+    float: left;
+    margin: 0 1.15% 20px;
+}
+
+/********************************************** K?t qu? Channel **/
+
+/********************************************** K?t qu? User **/
+
+/********************************************** CSS Decorate ***/

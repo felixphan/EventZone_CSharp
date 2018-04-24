@@ -1,0 +1,74 @@
+﻿@using EventZone.Helpers
+@{
+    ViewBag.Title = "Look Around";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var listCategory = CommonDataHelpers.Instance.GetAllCategory();
+}
+
+<div class="col-md-2 col-lg-2">Around you about</div> <input id="distance" type="number" class="form-control col-md-1 col-lg-1" style="width: auto;" min="1" max="100" value="20">
+<div class="col-md-1 col-lg-1">Km in</div>
+    <select id="category" class="form-control col-md-1 col-lg-1" style="width: auto;">
+        <option name="" value="-1">All</option>
+        @foreach (var item in listCategory)
+        {
+            <option value="@item.CategoryID">@item.CategoryName</option>
+        }
+    </select>
+    <button id="btn-find" class="btn btn-success">Find</button>
+
+    <h3><span id="id-number-result"></span><span id="location-selected"></span></h3>
+    <div id="id-place-detail" class="look-around">
+    </div>
+
+    <script>
+        var log = 0;
+        var lat = 0;
+        var distance = 20.0;
+        var category = -1;
+        $(document).ready(function () {
+            navigator.geolocation.getCurrentPosition(function (position) {
+                log = position.coords.longitude;
+                lat = position.coords.latitude;
+                $.ajax({
+                    url: "/LookAround/LookAround",
+                    type: "post",
+                    dataType: "html",
+                    data: { longitude: log, latitude: lat, distance: distance },
+                    success: function (data) {
+                        console.log()
+                        $("#id-place-detail").html(data);
+                    },
+                    error: function () {
+                        errorShow("Error", "Failed to connect with server! Please try again laters")
+                    }
+                })
+            });
+            $("#distance").change(function () {
+                distance = $("#distance").val();
+            })
+            $("#category").change(function () {
+                category = $("#category").val();
+            })
+            $("#btn-find").click(function () {
+                $.ajax({
+                    url: "/LookAround/LookAround",
+                    type: "post",
+                    dataType: "html",
+                    data: { longitude: log, latitude: lat, distance: distance, categoryID: category },
+                    success: function (data) {
+                        var iframes = document.getElementsByTagName('iframe');
+                        for (var i = 0; i < iframes.length; i++) {
+                            iframes[i].parentNode.removeChild(iframes[i]);
+                        }
+
+                        $("#id-place-detail").html(data);
+                    },
+                    error: function () {
+                        errorShow("Error", "Failed to connect with server! Please try again laters")
+                    }
+                })
+
+            })
+        })
+    </script>
+

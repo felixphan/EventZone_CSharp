@@ -1,0 +1,245 @@
+﻿@using EventZone.Models
+@{
+    var listEvent = Session["listEvent"] as List<ViewThumbEventModel>;
+    var listLiveStream = Session["listLiveStream"] as List<ViewThumbEventModel>;
+    var listUser = Session["listUser"] as List<ViewThumbUserModel>;
+    var task = TempData["task"];
+    ViewBag.Title = TempData["task"];
+    var tab = "-1";
+    try
+    {
+        tab = TempData["TabSearch"].ToString();
+    }
+    catch { };
+    
+    int listUserCount, listLiveStreamCount, listEventCount;
+    if (listUser == null)
+    {
+        listUserCount = 0;
+    }
+    else
+    {
+        listUserCount = listUser.Count;
+    }
+    if (listLiveStream == null)
+    {
+        listLiveStreamCount = 0;
+    }
+    else
+    {
+        listLiveStreamCount = listLiveStream.Count;
+    }
+    if (listEvent == null)
+    {
+        listEventCount = 0;
+    }
+    else
+    {
+        listEventCount = listEvent.Count;
+    }
+}
+<link href="~/Content/myCSS_s_r.css" rel="stylesheet" />
+<style>
+
+</style>
+
+<div class="d_search_panel">
+    <div class="d_arrow">
+        <span class="glyphicon glyphicon-chevron-left"></span>
+    </div>
+    <div class="d_3_tabs">
+        <div class="d_title">Search for</div>
+        <div class="d_item"><button id="btn-event">Event (@listEventCount)</button></div>
+        <div class="d_item"><button id="btn-liveEvent">Live Streaming (@listLiveStreamCount)</button></div>
+        <div class="d_item"><button id="btn-user">User (@listUserCount)</button></div>
+    </div>
+    <div class="d_filter" id="event-sort">
+        <div class="d_title">Sort by</div>
+        <div class="d_criteria">
+            <div class="radio" >
+                <label><input type="radio" name="optradio" value="1">Newest</label>
+            </div>
+            <div class="radio">
+                <label><input type="radio" name="optradio" value="2">Hottest</label>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div>
+    There are @listEventCount events, @listLiveStreamCount live streaming event and @listUserCount user found
+</div>
+<div class="d_result_container scroll-content" id="result" 
+    style="width: auto; padding-right: 10px; outline: none;height: 580px; padding-bottom: 0px; overflow: hidden;">
+    @Html.Action("LoadEventInPage", "Search", new { page = 1, type = 1 })
+</div>
+
+<!-- myJS -->
+<script src="~/Scripts/myJS_s_r.js"></script>
+
+<!-- Plugin Animation -->
+<script src="~/Scripts/jquery.transit.min.js"></script>
+<script>
+    var page = 2;
+    var sort = -1;
+    var type = 1;
+    $("input:radio[name=optradio]").click(function () {
+        sort = $(this).val();
+        page = 1;
+        $("#result").empty();
+        $.ajax({
+            url: "/Search/LoadEventInPage",
+            type: "post",
+            dataType: "html",
+            data: { page: page, type: type, sort: sort },
+            success: function (data) {
+                $(".loading").remove();
+                $('#result').append(data);
+                page = page + 1;
+            },
+            error: function () {
+                $(".loading").remove();
+            }
+        })
+    });
+    //paging for event result
+    $(document).ready(function () {
+        $('#result').bind('scroll', eventScroll);
+        $("#btn-event").click(function () {
+            type = 1;
+            $("#event-sort").show();
+            $("#result").unbind('scroll');
+            $("#result").removeClass("scroll-content");
+            $("#result").addClass("scroll-content");
+            $('#result').bind('scroll', eventScroll);
+            page = 1;
+            $("#result").empty();
+            $.ajax({
+                url: "/Search/LoadEventInPage",
+                type: "post",
+                dataType: "html",
+                data: { page: page, type: type, sort: sort },
+                success: function (data) {
+                    $(".loading").remove();
+                    $('#result').append(data);
+                    page = page + 1;
+                },
+                error: function () {
+                    $(".loading").remove();
+                }
+            })
+        })
+        ///btn-live event click
+        $("#btn-liveEvent").click(function () {
+            type = 2;
+            $("#event-sort").show();
+            $("#result").unbind('scroll');
+            $("#result").removeClass("scroll-content");
+            $("#result").addClass("scroll-content");
+            $("#result").empty();
+            page = 1;
+            $.ajax({
+                url: "/Search/LoadEventInPage",
+                type: "post",
+                dataType: "html",
+                data: { page: page, type: type, sort: sort },
+                success: function (data) {
+                    $(".loading").remove();
+                    $('#result').append(data);
+                    page = page + 1;
+                },
+                error: function () {
+                    $(".loading").remove();
+                }
+            })
+            $('#result').bind('scroll', liveEventScroll);
+        })
+        ///btn-user click
+        $("#btn-user").click(function () {
+            type = 3;
+            $("#event-sort").hide();
+            $("#result").unbind('scroll');
+            $("#result").removeClass("scroll-content");
+            $("#result").addClass("scroll-content");
+            $("#result").empty();
+            page = 1;
+
+            $.ajax({
+                url: "/Search/LoadUserInPage",
+                type: "post",
+                dataType: "html",
+                data: { page: page },
+                success: function (data) {
+                    $(".loading").remove();
+                    $('#result').append(data);
+                    page = page + 1;
+                },
+                error: function () {
+                    $(".loading").remove();
+                }
+            })
+            $('#result').bind('scroll', UserScroll);
+            
+        })
+    });
+
+    function eventScroll(e) {
+        var elem = $(e.currentTarget);
+        if (elem[0].scrollHeight - elem.scrollTop() == elem.outerHeight() && page >= 2) {
+            $.ajax({
+                url: "/Search/LoadEventInPage",
+                type: "post",
+                dataType: "html",
+                data: { page: page, type: 1 },
+                success: function (data) {
+                    $(".loading").remove();
+                    $('#result').append(data);
+                    page = page + 1;
+                },
+                error: function () {
+                    $(".loading").remove();
+                }
+            })
+        }
+    }
+    function liveEventScroll(e) {
+        var elem = $(e.currentTarget);
+        if (elem[0].scrollHeight - elem.scrollTop() == elem.outerHeight()&&page>=2) {
+            $.ajax({
+                url: "/Search/LoadEventInPage",
+                type: "post",
+                dataType: "html",
+                data: { page: page, type: 2 },
+                success: function (data) {
+                    $(".loading").remove();
+                    $('#result').append(data);
+                    page = page + 1;
+                },
+                error: function () {
+                    $(".loading").remove();
+                }
+            })
+        }
+    }
+
+
+    function UserScroll(e) {
+        var elem = $(e.currentTarget);
+        if (elem[0].scrollHeight - elem.scrollTop() == elem.outerHeight() && page >= 2) {
+            $.ajax({
+                url: "/Search/LoadUserInPage",
+                type: "post",
+                dataType: "html",
+                data: { page: page },
+                success: function (data) {
+                    $(".loading").remove();
+                    $('#result').append(data);
+                    page = page + 1;
+                },
+                error: function () {
+                    $(".loading").remove();
+                }
+            })
+        }
+    }
+</script>

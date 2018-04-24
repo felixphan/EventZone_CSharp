@@ -1,0 +1,431 @@
+/*********************************************** Thêm ***/
+
+/*********************************************** Sửa Flip ***/
+
+/*********************************************** Sửa BxSlider ***/
+.d_e_container .bx-prev{
+    margin-right: 15px;
+}
+.bx-wrapper .bx-controls-direction a{
+    top: 0;
+    margin-top: -33px;
+    margin-right: 5px;
+    z-index: 1;
+}
+.bx-controls-direction .bx-prev{				
+    margin-right: 10px;				
+}
+
+/*********************************************** Sửa Bootstrap ***/
+.form-horizontal .form-group {
+    margin-right: 0px;
+    margin-left: 0px;
+}
+body{
+	overflow-x: hidden;
+    overflow-y: scroll;
+}
+.btn-group > .btn:first-child:not(:last-child):not(.dropdown-toggle) {
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+}
+.nav > li > a:hover, .nav > li > a:focus{
+	background-color: transparent;
+}
+
+/*********************************************** Background ***/
+video{
+	height: auto;
+	position: fixed;
+	z-index: -1;
+}
+
+/*********************************************** Top Menu ***/
+
+
+/*********************************************** Sửa Bootstrap */
+.glyphicon{
+	color: black;
+}
+.btn-sm{
+	margin-top: 7px;
+    height: 35px;
+}
+@media (min-width: 768px){
+	.navbar-right{
+		height: 50px;
+	}
+}
+.dropdown-header{
+	margin-left: -10px;
+	color: gray;
+}
+.d_quick_search{
+	margin: 10px auto;
+	width: 90%;
+}
+/* Plug-in khác */
+.dropdown:hover .dropdown-menu {	/* Di chuột mở Menu, không cần click */
+	display: block;
+}
+.dropdown:hover .dropdown-menu {	/* Di chuột mở Menu, không cần click */
+	display: block;
+}
+
+/*********************************************** MIDDLE Category ***/
+.d_md_body{
+	margin-top: 680px;
+	font-family: segoe ui;
+	color: #fff;
+	background-color: transparent;
+}
+.d_mc_text_1,
+.d_mc_text_2,
+.d_mc_category{
+	text-align: center;
+}
+.d_mc_text_1{
+	font-size: 60px;
+    font-weight: 800;
+}
+.d_mc_text_1 .d_txt_1{				
+    font-size: 90px;				
+    font-weight: 800;				
+    color: rgb(230, 89, 38);		
+}
+.d_mc_text_2{
+	font-size: 20px;
+	font-weight: lighter;
+}
+.d_mc_text_2 a,
+.d_mc_text_2 a:hover{
+	color: #fff
+}
+.d_mc_category{
+	margin-top: 50px;
+	margin-bottom: 180px;
+}
+.d_mc_category a{
+	color: #fff;
+	border: 1px solid red;
+	border-radius: 5px;
+	margin-bottom: 10px;
+	font-size: 15px;
+	background-color: rgba(202,77,32,1);
+    border: 0;
+}
+.d_mc_category a:hover{
+	color: #fff;
+	background-color: rgba(230,89,38,1);
+}
+.d_mc_category a:focus {		
+        color: #fff;		
+        background-color: rgb(230, 89, 38);		
+    }
+/*********************************************** Middle Category > Statistic for each button ***/
+.d_popup_stat {
+    background-color: rgba(0,0,0,.3);
+    border: 2px solid #fff;
+    left: -230px;
+}
+.d_popup_stat #i_txt {
+    text-align: center;
+    margin-bottom: 25px;
+}
+.d_stat_cover{
+    display: -webkit-inline-box;
+}
+.d_stat{
+	width: 120px;
+    height: 100px;
+    text-align: center;
+}
+.d_stat .glyphicon {
+    color: white;
+    font-size: 40px;
+    position: relative;
+}
+.d_stat .d_data {
+    margin-top: 5%;
+    font-size: 30px;
+    font-weight: bold;
+    position: relative;
+    color: #fff;
+}
+.d_follow_cate {
+    border: 0px;
+    height: 0;
+    width: 200px;
+    padding: 2px 0 0 30px;
+}
+.d_follow_cate button{
+    background-color: rgba(202,77,32,1);				
+    color: #fff;
+}
+.d_follow_cate .d_btn_follow .glyphicon{
+    color: #fff;
+    margin-right: 5px;
+    font-size: 20px;
+}
+.d_follow_cate button:active:hover,
+.d_follow_cate button.active:hover,
+.open > .dropdown-toggle.d_follow_cate button:hover,
+.d_follow_cate button:active:focus,
+.d_follow_cate button.active:focus,
+.open > .dropdown-toggle.d_follow_cate button:focus,
+.d_follow_cate button:active.focus,
+.d_follow_cate button.active.focus,
+.open > .dropdown-toggle.d_follow_cate button.focus {
+  color: #fff;
+  background-color: rgb(230, 89, 38);
+}
+.d_btn_follow{
+    color: #fff;
+}
+.d_btn_follow:hover{
+    background-color: #FB612A;
+    color: #fff;
+}
+.d_btn_follow .glyphicon{
+    color: #fff;
+    margin-right: 5px;
+}
+/*********************************************** d_big_row: các Hàng lớn chứa Sự kiện ngang ***/
+.d_big_row {
+    border: 2px solid white;
+    height: 200px;
+    padding:5px;
+    background-color: rgba(0, 0, 0, .5);
+    margin-bottom: 20px;
+    border-radius: 5px;
+}
+.d_big_row .d_title{
+    font-size: 18px;
+    color: #fff;
+    padding: 0px 5px;
+    margin-bottom: 5px;
+}
+
+/*********************************************** d_big_row > d_row_1 ***/
+.bxslider .d_each_event{				
+    margin: 0;
+    height: 100px;
+}			
+.d_each_event img{
+    width: 120px;				
+    height: 100px;				
+    float: left;				
+}
+.d_ee_info{				
+    width: 55%;				
+    float: left;				
+    margin-left: 2%;				
+}				
+.d_ee_info .d_title {				
+    max-height: 13px;				
+    height: 60px;				
+    font-size: 16px;				
+    overflow: hidden;				
+}				
+.d_ee_info .d_time_left,				
+.d_ee_info .d_follow_no{				
+    margin-left: 5px;				
+}				
+.d_ee_info .glyphicon{				
+    margin-left: 5px;				
+    float: left;				
+    margin-right: 5px;				
+}		
+	.d_ee_info .d_time_left,				
+.d_ee_info .d_follow_no{				
+    margin-left: 5px;				
+}				
+.d_ee_info .glyphicon{				
+    margin-left: 5px;				
+    float: left;				
+    margin-right: 5px;				
+}			
+.bx-wrapper .bx-pager.bx-default-pager a{		
+    background-color: #fff;		
+}		
+.bx-wrapper .bx-pager.bx-default-pager a:hover {		
+    background-color: rgba(230, 89, 38, .5);		
+}		
+.bx-wrapper .bx-pager.bx-default-pager a.active{		
+    background-color: rgb(230, 89, 38);		
+}		
+/*********************************************** d_big_row > d_row_1 > Each Event ***/		
+.bx-viewport{		
+    font-size: small;		
+    height: 130px;		
+}		
+.d_each_event #flipper-inside{		
+    background-color: #fff;		
+}
+.d_each_event .front .glyphicon{		
+    margin: 0 10px 0 5px;		
+    float: left;		
+    width: 4%;		
+}		
+.d_live_text{		
+    top: 10px;		
+    left: 12px;		
+    font-weight: bold;		
+    color: #E65926;		
+    font-size: 10px;		
+    font-style: italic;		
+    background: rgba(255, 255, 255, .9);		
+    height: 18px;		
+    width: 45px;		
+    text-align: center;		
+    border-radius: 52px;		
+    border: 1px solid #E65926;				
+}		
+.d_live_dot {		
+    font-size: 13px;		
+    position: relative;		
+    margin: 1px;		
+    top: -1px;		
+    left: -2px;		
+    height: 0;		
+    color: #E65926;
+}
+.d_each_event .front #i_verify_icon{
+    width: 30px;
+    height: 30px;
+    position: absolute;
+    margin: 5px;
+}
+.d_each_event .back{		
+    background-color: rgb(230, 89, 38);		
+    color: #fff;		
+    padding: 2px;		
+}		
+.d_each_event .back .d_title{		
+    width: 100%;		
+    height: 40px;		
+    max-height: 40px;		
+    overflow-y: hidden;		
+    float: left;		
+}		
+.d_each_event .back a{		
+    color: #fff;		
+    text-decoration: none;		
+}		
+.d_each_event .back .glyphicon{		
+    margin: 0 10px 0 10px;		
+    float: left;		
+    width: 4%;		
+    color: #fff;		
+}		
+.d_each_event .back .d_time_left,		
+.d_each_event .back .d_author{		
+    width: 75%;		
+    float: left;		
+}		
+.d_each_event .back .btn{		
+    border: 0;
+}
+/*********************************************** Footer ***/
+.d_footer{
+     width: 125%;
+    padding: 0px 2%;
+	color: #fff;
+	height: 150px;
+    margin-left: -12.5%;
+	background-color: #222;
+}
+.d_footer_column_1,
+.d_footer_column_3{
+	border-left: 1px gray dashed;
+	border-right: 1px gray dashed;
+	height: 80%;
+	margin-top: 2%;
+}
+.d_footer_column_2{
+	height: 80%;
+	margin-top: 2%;	
+}
+/*********************************************** About ***/
+/************************************ Tạm thời Không có About ***/
+.d_about_body{
+	border: 1px red solid;
+}
+
+/*********************************************** Footer ***/
+.d_footer iframe{
+	height: 350px;
+}
+.d_ft_footer{
+	color: #fff;
+	height: 350px;
+	background-color: #222;
+}
+.d_ft_footer_column_1,
+.d_ft_footer_column_3{
+	border-left: 1px gray dashed;
+	border-right: 1px gray dashed;
+	height: 80%;
+	margin-top: 2%;
+}
+.d_ft_footer_column_2{
+	height: 80%;
+	margin-top: 2%;	
+}
+
+/*********************************************** Decorate ***/
+/*********************************************** Thêm ***/
+
+.d_live_mark .glyphicon{		
+	color: #CE4919;		
+}		
+
+.front .d_ee_front_info{		
+    width: 59%;		
+    float: left;		
+    margin-left: 2%;		
+}		
+.front .d_ee_front_info div{		
+	margin-left: 5px;		
+	float: left;		
+}		
+.front .d_ee_front_info .d_title{		
+	height: 40px;		
+	max-height: 40px;		
+	margin-left: 0;		
+	width: 100%;		
+	font-weight: 600;		
+	font-size: 14px;		
+}		
+.front .d_ee_front_info .d_time_left,		
+.front .d_ee_front_info .d_follow_no{		
+	width: 100%;		
+	display: flex;		
+}
+.d_ee_back_info{		
+	width: 75%;		
+	float: left;		
+}		
+.d_ee_back_info .d_time,		
+.d_ee_back_info .d_date,		
+.d_ee_back_info .d_location{		
+	width: 100%;		
+	display: flex;		
+	margin-left: 5px;		
+}		
+.d_ee_back_info .first{		
+	margin-top: 5px;		
+}		
+.back__content .d_group_btn{		
+	width: 20%;		
+    float: left;		
+    margin: -20px 0 0 3%;		
+}		
+.back__content .d_group_btn .btn{		
+	width: 100%;		
+    margin-bottom: 1px;		
+}
+/*********************************************** Thêm ***/
+
+/*********************************************** Thêm ***/
+

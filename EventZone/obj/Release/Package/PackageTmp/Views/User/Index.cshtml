@@ -1,0 +1,575 @@
+﻿@using EventZone.Models
+@using EventZone.Helpers
+@model EventZone.Models.User
+@{
+    ViewBag.Title = "User";
+    var errorTitle = TempData["errorTitle"];
+    var errorMessage = TempData["errorMessage"];
+    User currentUser = UserHelpers.GetCurrentUser(Session);
+    User user= Model as User;
+    if (user==null && currentUser == null)
+    {
+        Response.Redirect("~/Home");
+    }
+    List<Event> latestEvent = UserDatabaseHelper.Instance.GetUserEvent(user.UserID);    
+    bool isOwner= false;
+    if(user!=null&&user==currentUser){
+        isOwner=true;
+    }
+}
+
+<link href="~/Content/myCSS_u_m_p.css" rel="stylesheet" />
+
+<div>
+        <!-- Khung chứa Thông tin chung -->
+        <div class="d_left_side d_style_of_tabs">
+            <ul class="nav nav-tabs" id="i_info_tab">
+                <li class="li-tab active"><a href="#i_tab_info" data-toggle="tab">User Info</a></li>
+                <li class="li-tab"><a href=" #i_tab_follow" data-toggle="tab">Follow</a></li>
+                <li class="d_trick"></li>
+                <li class="slider"></li>
+            </ul>
+            <div class="tab-content i_tab_info">
+                <!-- Khung chứa User info -->
+                <div class="tab-pane active" id="i_tab_info">
+                    <div class="d_info_tren">
+                        <div class="d_ava">
+                           <img id="userAvatar" src="@EventDatabaseHelper.Instance.GetImageByID(user.Avartar).ImageLink">
+                          @if (currentUser == user)
+                          {
+                            <center>  <button data-toggle="modal" id="i_btn_chg_ava" data-target="#user-upload-avatar-modal" class="btn btn-primary btn-sm">Change</button></center>
+                            <div class="modal fade" id="user-upload-avatar-modal" role="dialog">
+                                <div class="modal-dialog" style="width:250px">
+                                    <!-- Modal content-->
+                                    <div class="panel panel-info d_margin_top" style="width:400px;height:450px">
+                                        <div class="panel-heading">
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                            <div class="panel-title"><center>Upload avatar</center></div>
+                                        </div>
+                                        <div class="panel-body" >
+                                                    <!--thumb uploaded image-->
+                                                    @using (Html.BeginForm("UploadAvatar", "User", FormMethod.Post, new { enctype = "multipart/form-data", id = "UploadAvatarForm" }))
+                                                    {
+                                                        <center>
+                                                            <label id="lable-upload" for="uploadBtn">
+                                                                <span id="list" style="width:320px; height:260px"><img class="preViewAvatar" src="~/img/default-mobile-thumbnail.png"></span>
+                                                            </label>
+                                                            
+                                                            <input name="file" type="file" class="hidden" data-max-size="2097152" id="uploadBtn" accept=".jpg,.png,.jpeg,.bmp,.gif" />
+                                                            <div class="progress progress-striped active hidden" id="progress-bar">
+                                                                <div class="progress-bar upload-progress " role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 100%">Uploading...</div>
+                                                            </div>  
+                                                            <div id="error-select-file" style="color:red"><span></span></div>
+                                                            <i id="max-size" class="col-xs-12 col-sm-12 col-md-12 col-lg-12 ">Image size must be less than 2Mb<span id="i_required_mark"> *</span></i>
+                                                           
+                                                            <center>
+                                                                <input id="btn-submit-change-avatar" type="submit" class="btn btn-primary btn-sm" value="Upload" />
+                                                            </center>
+                                                        </center>
+                                                          
+                                                    }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                          }
+                          else
+                          {
+                            <center>  <button id="i_follow_user"class="btn btn-primary btn-sm">@if (currentUser != null && currentUser != user && UserDatabaseHelper.Instance.IsFollowingUser(currentUser.UserID, user.UserID)) { <span id="btn-following" onclick="Unfollow(@user.UserID)">Following</span>}else{<span id="btn-follow" onclick="Follow(@user.UserID)">Follow</span>}</button></center>
+                          }
+                        </div>
+                        <div class="d_info">
+                            <div class="d_user_name">
+                                @user.UserName
+                            </div>
+                            <div class="row">
+                                <div class="d_icon">
+                                    <span class="fa fa-calendar-plus-o"></span>
+                                </div>
+                                <div class="d_icon_info">
+                                    Date Join: @user.DataJoin.ToShortDateString()
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="d_icon">
+                                    <span class="fa fa-bookmark-o"></span>
+                                </div>
+                                <div class="d_icon_info">
+                                    Events: @UserDatabaseHelper.Instance.CountOwnedEvent(user.UserID)
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="d_icon">
+                                    <span class="fa fa-users"></span>
+                                </div>
+                                <div class="d_icon_info">
+                                    Followers: @UserDatabaseHelper.Instance.NumberFollower(user.UserID)
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="d_icon">
+                                    <span class="fa fa-envelope"></span>
+                                </div>
+                                <div class="d_icon_info">
+                                    E-mail: <a href="mailto:@user.UserEmail" target="_top">@user.UserEmail</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d_info_duoi">
+                        @if (isOwner)
+                        {
+                            <div id="update-basic-info" hidden>
+                                @Html.Action("UpdateInfo", "User")
+                            </div>
+                        }
+                        
+                        <div id="view-basic-info">
+                        <div class="row">
+                            <!-- row FirstName -->
+                            <div class="col-lg-4 d_label">
+                                First Name:
+                            </div>
+                            <div class="col-lg-8">
+                                @user.UserFirstName
+                            </div>
+                        </div>
+                        <div class="row">
+                            <!-- row LastName -->
+                            <div class="col-lg-4 d_label">
+                                Last Name:
+                            </div>
+                            <div class="col-lg-8">
+                                @if (String.IsNullOrEmpty(user.UserLastName))
+                                {
+                                    <span>Not given yet</span>
+                                }
+                                else
+                                {
+                                    <span>@user.UserLastName</span>
+                                }
+                            </div>
+                        </div>
+                        <div class="row">
+                            <!-- row DOB -->
+                            <div class="col-lg-4 d_label">
+                                Birthday:
+                            </div>
+                            <div class="col-lg-8">
+                                @if (user.UserDOB != null)
+                                {
+                                    <span>@user.UserDOB.ToShortDateString()</span>
+                                }
+                                else
+                                {
+
+                                }
+                            </div>
+                        </div>
+                        <div class="row">
+                            <!-- row Address -->
+                            <div class="col-lg-4 d_label">
+                                Address:
+                            </div>
+                            <div class="col-lg-8">
+                                @if (user.Place != null)
+                                {
+                                    <span>@user.Place</span>
+                                }
+                                else
+                                {
+                                    <span>Not given yet</span>
+                                }
+                            </div>
+                        </div>
+                        <div class="row">
+
+                            <div class="col-lg-4 d_label">
+                                Gender:
+                            </div>
+                            <div class="col-lg-8">
+                                @if (user.Gender == EventZoneConstants.isFemale)
+                                {
+                                    <span>Female</span>
+                                }
+                                else
+                                {
+                                    <span>Male</span>
+                                }
+                            </div>
+                        </div>
+                        <div class="row">
+                            <!-- row Phone Number -->
+                            <div class="col-lg-4 d_label">
+                                Phone:
+                            </div>
+                            <div class="col-lg-8">
+                                @if (user.Phone != null)
+                                {
+                                    <span>@user.Phone</span>
+                                }
+                                else
+                                {
+                                    <span>Not given yet</span>
+                                }
+                            </div>
+                        </div>
+                        <div class="row">
+                            <!-- row ID card -->
+                            <div class="col-lg-4 d_label">
+                                ID card:
+                            </div>
+                            <div class="col-lg-8">
+                                @if (user.IDCard != null)
+                                {
+                                    <span>@user.IDCard</span>
+                                }
+                                else
+                                {
+                                    <span>Not given yet</span>
+                                }
+                            </div>
+                        </div>
+                        <div class="row">
+                            <!-- row Update Button -->
+                            <div class="col-lg-4 d_label">
+                            </div>
+                            @if (isOwner)
+                            {
+                                <div class="col-lg-8">
+                                    <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#change-password-modal" id="i-change-password-btn" onclick="clearError()">ChangePassword</button>
+                                    <!-- ALL MODAL here -->
+                                    <!-- MODAL Chang Password -->
+                                    <div class="modal fade" id="change-password-modal" role="dialog">
+                                        <div class="modal-dialog">
+                                            <!-- Modal content-->
+                                            <div class="panel panel-info d_margin_top">
+                                                <div class="panel-heading">
+                                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                                    <div class="panel-title">Change Password</div>
+                                                </div>
+                                                <div class="panel-body">
+                                                    <div class="cover_all_functions">
+                                                        <div class="tab-content">
+                                                            @Html.Action("ChangePassword", "User")
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button type="button" class="btn btn-primary btn-sm" id="btn-update">Update</button>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                    </div>
+                </div>
+
+                <!-- Khung chứa Follow -->
+                <div class="tab-pane" id="i_tab_follow">
+
+                    @if (user != null)
+                    {
+                        @Html.Action("ManageFollow", "User", new { userID = user.UserID })
+                    }
+                    else
+                    {
+                        @Html.Action("ManageFollow", "User")
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Khung chứa Các Event khác -->
+        <div class="d_right_side_top d_style_of_tabs">
+            <ul class="nav nav-tabs" id="i_event_tab">
+                <li class="li-tab active" ><a href="#i_events" data-toggle="tab">Latest Events</a></li>
+                <li class="d_trick"></li>
+                <li class="slider_2"></li>
+            </ul>
+                    <div class="d_events_cover">
+                        @if (latestEvent != null && latestEvent.Count != 0)
+                        {
+                            latestEvent = latestEvent.OrderByDescending(m => m.EventRegisterDate).ToList();
+                            for (int i = 0; i < latestEvent.Count; i++)
+                            {
+                                Event currentEvent = latestEvent[i];
+                                if (i == 3)
+                                {
+                                    break;
+                                }
+                                <div class="d_each_event">
+                                    <div class="d_thumb">
+                                        <img src="@EventDatabaseHelper.Instance.GetImageByID(currentEvent.Avatar).ImageLink">
+                                    </div>
+                                    <div class="d_info">
+                                        <div class="d_title">
+                                            @Html.ActionLink(currentEvent.EventName, "Details", "Event", new { id = currentEvent.EventID }, new { target = "_blank" })
+                                        </div>
+                                        <div class="d_time_left">
+                                            Start in @currentEvent.EventStartDate.ToString()
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                            <div class="d_txt_show_all" style="text-align: center;">
+                                <a href="@Url.Action("Event", "User", new {userID = user.UserID })">View All</a>
+                            </div>
+                        }
+                        else
+                        {
+                            if (latestEvent == null || latestEvent.Count == 0)
+                            {
+                                if (currentUser != null && user == currentUser)
+                                {
+                                    <div>You have no event.</div> <a href="@Url.Action("Create","Event")">Create now</a>
+                                }
+                                else
+                                {
+                                    <div>This user current has no event!</div>
+                                }
+                            }
+                        }
+                    </div>
+
+        </div>
+
+        <!-- Khung chứa Notification -->
+        <div class="d_right_side_bottom d_style_of_tabs">
+            <ul class="nav nav-tabs" id="i_noti_tab">
+                <li class="li-tab active"><a href="#i_noti" data-toggle="tab">About me</a></li>
+                <li class="d_trick"></li>
+                <li class="slider_3"></li>
+            </ul>
+            <div class="tab-content d_tab_noti">
+                <div class="d_noti_cover" id="about-me-panel">
+                    <span id="about-me-area">
+                        @UserDatabaseHelper.Instance.GetChannelDescription(
+                    UserDatabaseHelper.Instance.GetUserChannel(user.UserID).ChannelID
+                    )
+                    </span>
+              
+                    @if (isOwner)
+                    {
+                        <label hidden id="label-edit-about-me" for="btn-change-about-me" style="padding-left:367px;position:fixed">
+                            <img style="height:40px;width:40px;" src="~/img/edit_write_icon_T.png" />
+                        </label>
+                        <button data-toggle="modal" data-target="#edit-about-me" id="btn-change-about-me" class="btn btn-success hidden" style="position:relative"></button>
+                        <div>
+                            <div class="modal fade" id="edit-about-me" role="dialog" >
+                                <div class="modal-dialog" style="width:420px; height:187px">
+                                    <!-- Modal content-->
+                                    <div class="panel panel-info d_margin_top">
+                                        <div class="panel-heading">
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                            <div class="panel-title">About me</div>
+                                        </div>
+                                        <div class="panel-body" style="width:420px; height:250px">
+                                            <textarea id="about-me-new-content" style="width:100%;height:80%;resize:none;overflow-wrap:break-word">
+                                                @UserDatabaseHelper.Instance.GetChannelDescription(
+                                                UserDatabaseHelper.Instance.GetUserChannel(user.UserID).ChannelID
+                                                )
+                                            </textarea>
+                                            <button id="save-about-me" class="btn btn-success">Save</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+</div>
+<script>
+    //an hien nut edit about me
+    $("#about-me-panel").mouseover(function (event) {
+        $("#label-edit-about-me").show();
+    })
+    $("#about-me-panel").mouseout(function (event) {
+        $("#label-edit-about-me").hide();
+    })
+
+    //save edit about me
+    $("#save-about-me").click(function () {
+        $.ajax({
+            url: "/User/ChangeAboutMe",
+            type: "post",
+            dataType: "json",
+            data: { userID: '@Model.UserID', newContent: $("#about-me-new-content").val() },
+            success: function (data) {
+                if (data.state == 1) {
+                    $(".modal").modal("hide");
+                    $("#about-me-area").text($("#about-me-new-content").val());
+                } else {
+                    $(".modal").modal("hide")
+                    errorShow(data.error, data.message);
+                }
+            },
+            error: function () {
+                $(".modal").modal("hide")
+                errorShow("Error", "Failed to connect with server!");
+            }
+
+
+        })
+
+    })
+
+</script>
+
+<script>
+    function Follow(userID) {
+        if ('@currentUser' == null || '@currentUser' == "") {
+            errorShow("Require signin!", "Please signin to follow this user!")
+        } else {
+            $.ajax({
+                url: "/User/FollowUser",
+                type: "post",
+                dataType: "json",
+                data: { userID: userID },
+                success: function (data) {
+                    if (data.state == 0) {
+                        errorShow(data.error, data.message)
+                    } else {
+                        $("#i_follow_user").html('<span id="btn-following" onclick="Unfollow(' + data.userID + ')">Following</span>')
+                    }
+                },
+                error: function () {
+                    errorShow("Failed Connection!", "Failed to connect to server! Please try again later!")
+                }
+            })
+        }
+    }
+    function Unfollow(userID) {
+        $.ajax({
+            url: "/User/UnFollowUser",
+            type: "post",
+            dataType: "json",
+            data: { userID: userID },
+            success: function (data) {
+                if (data.state == 0) {
+                    errorShow(data.error, data.message)
+                } else {
+                    $("#i_follow_user").html('<span id="btn-follow" onclick="Follow(' + data.userID + ')">Follow</span>')
+                }
+            },
+            error: function () {
+                errorShow("Failed Connection!", "Failed to connect to server! Please try again later!")
+            }
+        })
+    }
+
+    var fileInput = $('#uploadBtn');
+
+    ///check browse user avatar
+    fileInput.change(function (event) {
+        $("#error-select-file").empty();
+        $("#max-size").css("color", "black");
+        if (fileInput.get(0).files.length) {
+            var fileSize = fileInput.get(0).files[0].size; // in bytes
+            if (fileSize > 2097152) {
+                $("#list").html('<img class="preViewAvatar" src="../img/default-mobile-thumbnail.png">');
+                $("#uploadBtn").val(null);
+                $("#max-size").css("color", "red");
+                event.preventDefault();
+                return false;
+            } else {
+                return true;
+            }
+        } else {
+            $("#list").html('<img class="preViewAvatar" src="../img/default-mobile-thumbnail.png">');
+            $("#uploadBtn").val(null);
+            event.preventDefault();
+            return false;
+        }
+    });
+    $("#UploadAvatarForm").submit(function (event) {
+        $("#max-size").css("color", "black");
+        if (!fileInput.get(0).files.length) {
+            $("#error-select-file").html("Please select image!")
+            event.preventDefault();
+            return false;
+        } else {
+            $("#progress-bar").removeClass("hidden");
+            $("#btn-submit-change-avatar").prop('disabled', true);
+            $("#lable-upload").prop('for', "");
+        }
+    });
+
+    function handleFileSelect(evt) {
+        var files = evt.target.files; // FileList object
+
+        // Loop through the FileList and render image files as thumbnails.
+        for (var i = 0, f; f = files[i]; i++) {
+
+            // Only process image files.
+            if (!f.type.match('image.*')) {
+                $("#list").html('<img  class="preViewAvatar" src="../img/default-mobile-thumbnail.png">');
+                $("#uploadBtn").val(null);
+                continue;
+            } else if (files[i].size > 2097152) {
+                $("#list").html('<img class="preViewAvatar" src="../img/default-mobile-thumbnail.png">');
+                $("#uploadBtn").val(null);
+                continue;
+            }
+
+            var reader = new FileReader();
+
+            // Closure to capture the file information.
+            reader.onload = (function (theFile) {
+                return function (e) {
+                    // Render thumbnail.
+                    $("#list").empty();
+                    var span = document.createElement('span');
+                    span.innerHTML = ['<img class="preViewAvatar" src="', e.target.result,
+                                      '" title="', escape(theFile.name), '"/>'].join('');
+                    document.getElementById('list').insertBefore(span, null);
+                };
+            })(f);
+
+            // Read in the image file as a data URL.
+            reader.readAsDataURL(f);
+        }
+    }
+    if (document.getElementById('uploadBtn') != null) {
+        document.getElementById('uploadBtn').addEventListener('change', handleFileSelect, false);
+    }
+    $("#btn-update").click(function () {
+        $("#update-basic-info").show();
+        $("#view-basic-info").hide();
+    })
+</script>
+
+<script>
+    $("#i_info_tab li").click(function (e) {
+        if ($(this).hasClass('slider')) {
+            return;
+        }
+        var whatTab = $(this).index();
+        var howFar = 130 * whatTab;
+        $(".slider").css({
+            left: howFar + "px"
+        });
+        $(".ripple").remove();
+        var posX = $(this).offset().left,
+            posY = $(this).offset().top,
+            buttonWidth = $(this).width(),
+            buttonHeight = $(this).height();
+        $(this).prepend("<span class='ripple'></span>");
+        if (buttonWidth >= buttonHeight) {
+            buttonHeight = buttonWidth;
+        } else {
+            buttonWidth = buttonHeight;
+        }
+        var x = e.pageX - posX - buttonWidth / 2;
+        var y = e.pageY - posY - buttonHeight / 2;
+        $(".ripple").css({
+            width: buttonWidth,
+            height: buttonHeight,
+            top: y + 'px',
+            left: x + 'px'
+        }).addClass("rippleEffect");
+    });
+</script>

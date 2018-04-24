@@ -1,0 +1,107 @@
+﻿@using EventZone.Models
+@using EventZone.Helpers
+@model IEnumerable<EventZone.Models.Event>
+@{
+    bool hasMore = bool.Parse(TempData["LoadMore"].ToString());
+}
+@if (Model != null)
+{
+    foreach (var item in Model) 
+    {
+        <div class="d_each_event">
+            <div class="d_thumb">
+                <img src="@EventDatabaseHelper.Instance.GetImageByID(item.Avatar).ImageLink">
+            </div>
+            <div class="d_info">
+                <div class="d_title"  style="height:25px">
+                    @Html.ActionLink(item.EventName, "Details", "Event", new { id = item.EventID }, new { target = "_blank" })
+                </div>
+                <div class="d_time_left">
+                    All report:<a href="#" data-toggle="modal" data-target="#all-report-@item.EventID--1"><i>@EventDatabaseHelper.Instance.GetListReportOfEvent(item.EventID).Count</i></a>
+                    @Html.Action("ViewReport", "User", new { eventID = item.EventID })
+                </div>
+                @if (EventDatabaseHelper.Instance.GetEventAppeal(item.EventID) != null && EventDatabaseHelper.Instance.GetEventAppeal(item.EventID).Count > 0)
+                {
+                    <div class="d_time_left">
+                        All Appeal:<a href="#" data-toggle="modal" data-target="#all-appeal-@item.EventID--1"><i>@EventDatabaseHelper.Instance.GetEventAppeal(item.EventID).Count</i></a>
+                        @Html.Action("ViewAppeal", "User", new { eventID = item.EventID })
+                    </div>
+                }
+
+                @if (item.Status == EventZoneConstants.Active)
+                {
+                    if (EventDatabaseHelper.Instance.GetEventReport(item.EventID, EventZoneConstants.Pending) != null && EventDatabaseHelper.Instance.GetEventReport(item.EventID, EventZoneConstants.Pending).Count > 0)
+                    {
+                        <div class="d_time_left">
+                            Pending report:<a href="#" data-toggle="modal" data-target="#all-report-@item.EventID-@EventZoneConstants.Pending"><i>@EventDatabaseHelper.Instance.GetListReportOfEvent(item.EventID).FindAll(a => a.ReportStatus == EventZoneConstants.Pending).ToList().Count</i></a>
+                            @Html.Action("ViewReport", "User", new { eventID = item.EventID, type = EventZoneConstants.Pending })
+                        </div>
+                    }
+
+                    <div class="d_time_left">Status: Active</div>
+                    if (UserDatabaseHelper.Instance.AppealSuccess(item.EventID) && @EventDatabaseHelper.Instance.GetListReportOfEvent(item.EventID).FindAll(a => a.ReportStatus == EventZoneConstants.Pending).ToList().Count == 0)
+                    {
+                        <div class="d_time_left">Congrazts! We have reviewed your event again and determine that your event is satisfy with our TOS, so we decided make it available again! Thanks you for contact with us! </div>
+                    }
+                }
+                @if (item.Status == EventZoneConstants.Lock)
+                {
+                    <div class="d_time_left">Status: Locked</div>
+                    <div class="d_time_left" style="width:inherit">Reason: @item.LockedReason</div>
+
+                    if (EventDatabaseHelper.Instance.GetEventAppeal(item.EventID, EventZoneConstants.Pending) != null && EventDatabaseHelper.Instance.GetEventAppeal(item.EventID, EventZoneConstants.Pending).Count != 0)
+                    {
+                        <div class="d_time_left">
+                            You appeal current be reviewing! Click <a href="#" data-toggle="modal" data-target="#all-appeal-@item.EventID-@EventZoneConstants.Pending">here</a> to view detail
+                            @Html.Action("ViewAppeal", "User", new { eventID = item.EventID, type = EventZoneConstants.Pending })
+                        </div>
+
+                    }
+                    else if (UserDatabaseHelper.Instance.AppealFailed(item.EventID))
+                    {
+                        <div class="d_time_left">
+                            We have reviewed your appeal and decided still lock your event because it againts our TOS. Please read clearly our TOS before upload an event
+                        </div>
+                    }
+                    else
+                    {
+                        <div id="pannel-button-appeal-@item.EventID" class="d_info">
+                            <div id="appeal-panel-@item.EventID"><button data-toggle="modal" data-target="#i_appeal_modal_@item.EventID" class="btn btn-success btn-xs">Appeal</button></div>
+                            <div id="i_appeal_modal_@item.EventID" class="modal fade" role="dialog">
+                                <div class="modal-dialog">
+                                    <!-- Modal content-->
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                            <h4 class="modal-title">
+                                                Appeal Panel
+                                            </h4>
+                                        </div>
+                                        <div class="modal-body">
+                                            <input hidden id="eventID" />
+                                            Content:
+                                            <textarea id="appeal-content_@item.EventID" class="form-control" maxlength="100" style="margin: 0px;width: 568px;height: 62px;"></textarea>
+                                            <div><i>Reason appeal limited by 100 characters</i></div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button class="btn btn-success"onclick="SendAppeal(@item.EventID)">Send</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+    }
+    if (hasMore)
+    {
+        <div class="loading" id="loading" style="text-align: center; height:82px">
+            <img src="~/img/google-loading-icon.gif" style="height:82px" />
+            <p style="text-align: center">
+                <b>Loading more data</b>
+            </p>
+        </div>
+    }
+}

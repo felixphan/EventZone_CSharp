@@ -1,0 +1,199 @@
+﻿@using EventZone.Models
+@{
+    var listEvent = Session["listEvent"] as List<ViewThumbEventModel>;
+    var listLiveStream = Session["listLiveStream"] as List<ViewThumbEventModel>;
+    var listUser = Session["listUser"] as List<ViewThumbUserModel>;
+    var task = TempData["task"];
+    ViewBag.Title = TempData["task"];
+    var tab = "-1";
+    try
+    {
+        tab = TempData["TabSearch"].ToString();
+    }
+    catch { };
+    
+    
+    int listUserCount, listLiveStreamCount, listEventCount;
+    if (listUser == null)
+    {
+        listUserCount = 0;
+    }
+    else
+    {
+        listUserCount = listUser.Count;
+    }
+    if (listLiveStream == null)
+    {
+        listLiveStreamCount = 0;
+    }
+    else
+    {
+        listLiveStreamCount = listLiveStream.Count;
+    }
+    if (listEvent == null)
+    {
+        listEventCount = 0;
+    }
+    else
+    {
+        listEventCount = listEvent.Count;
+    }
+}
+<link href="~/Content/User/myCSS_s_r.css" rel="stylesheet" />
+<div class="d_result_cover ">
+    <div class="col-xs-8 col-sm-9 col-md-9 col-lg-10 d_result_container" id="pannel-result" style="height:550px">
+        <!-- Tab panes -->
+        <div class="tab-content">
+            <!-- EVENT Result: e_ đánh dấu CSS Event -->
+            @if (tab != "3")
+            {
+                <div class="tab-pane active" id="tab-all-event">
+                    <div class="d_result_container scroll-content" id="event-r">
+                        @Html.Action("LoadEventInPage", "Search", new { page = 1, type = 1 });
+                    </div>
+                </div>
+            }
+
+            @if (tab == "3" || tab == "2")
+            {
+                <div class="tab-pane" id="tab-live-event">
+                    <div class="d_result_container scroll-content" id="liveEvent-r" style="width:100%">
+                        @Html.Action("LoadEventInPage", "Search", new { page = 1, type = 2 })
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="tab-pane" id="tab-live-event">
+
+                    <div class="d_result_container scroll-content" id="liveEvent-r" style="width:100%">
+                        @Html.Action("LoadEventInPage", "Search", new { page = 1, type = 2 })
+                    </div>
+
+                </div>
+            }
+            <!-- Live Event Result: c_ đánh dấu CSS Live Event -->
+            <!-- USER Result: u_ đánh dấu CSS User -->
+            @if (tab != "3" && task == "Search")
+            {
+                <div class="tab-pane" id="tab-user">
+                    <div class="d_result_container scroll-content" id="user-r">
+                        @Html.Action("LoadUserInPage", "Search", new { page = 1});
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+    <div class="col-xs-4 col-sm-3 col-md-3 col-lg-2 d_tab_container">
+        <!-- required for floating -->
+        <!-- Nav tabs -->
+        <ul class="nav nav-tabs tabs-right">
+            @if (tab != "3")
+            {
+                <li class="active">
+                    <a href="search-result.html#tab-all-event" data-toggle="tab">Event (@listEventCount)</a>
+                </li>
+            }
+            @if (tab == "3" || tab == "2")
+            {
+                <li class="active">
+                    <a href="search-result.html#tab-live-event" data-toggle="tab">Live Streaming (@listLiveStreamCount)</a>
+                </li>
+            }
+            else
+            {
+                <li>
+                    <a href="search-result.html#tab-live-event" data-toggle="tab">Live Streaming (@listLiveStreamCount)</a>
+                </li>
+            }
+
+            @if (tab != "3" && task == "Search")
+            {
+                <li>
+                    <a href="search-result.html#tab-user" data-toggle="tab">User(@listUserCount)</a>
+                </li>
+            }
+
+        </ul>
+    </div>
+</div>
+
+<script>
+
+    //paging for event result
+    $(document).ready(function () {
+        $('#event-r').bind('scroll', eventScroll);
+    });
+    var pageEvent = 2;
+    function eventScroll(e) {
+        var elem = $(e.currentTarget);
+        if (elem[0].scrollHeight - elem.scrollTop() == elem.outerHeight()) {
+            
+            $.ajax({
+                url: "/Search/LoadEventInPage",
+                type: "post",
+                dataType: "html",
+                data: { page: pageEvent, type: 1 },
+                success: function (data) {
+                    $(".loading").remove();
+                    $('#event-r').append(data);
+                    pageEvent = pageEvent + 1;
+                },
+                error: function () {
+                    $(".loading").remove();
+                }
+            })
+        }
+    }
+
+    //paging for live event result
+    $(document).ready(function () {
+        $('#liveEvent-r').bind('scroll', liveEventScroll);
+    });
+    var pageLive = 2;
+    function liveEventScroll(e) {
+        var elem = $(e.currentTarget);
+        if (elem[0].scrollHeight - elem.scrollTop() == elem.outerHeight()) {
+            
+            $.ajax({
+                url: "/Search/LoadEventInPage",
+                type: "post",
+                dataType: "html",
+                data: { page: pageLive, type: 2 },
+                success: function (data) {
+                    $(".loading").remove();
+                    $('#liveEvent-r').append(data);
+                    pageLive = pageLive + 1;
+                },
+                error: function () {
+                    $(".loading").remove();
+                }
+            })
+        }
+    }
+    //paging for user-result
+    $(document).ready(function () {
+          $('#user-r').bind('scroll', UserScroll);
+    });
+    var pageUser = 2;
+    function UserScroll(e) {
+        var elem = $(e.currentTarget);
+        if (elem[0].scrollHeight - elem.scrollTop() == elem.outerHeight()) {
+
+            $.ajax({
+                url: "/Search/LoadUserInPage",
+                type: "post",
+                dataType: "html",
+                data: { page: pageUser},
+                success: function (data) {
+                    $(".loading").remove();
+                    $('#user-r').append(data);
+                    pageUser = pageUser + 1;
+                },
+                error: function () {
+                    $(".loading").remove();
+                }
+            })
+        }
+    }
+</script>

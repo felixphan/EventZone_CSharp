@@ -1,0 +1,85 @@
+﻿@using EventZone.Models
+<div class="navbar-form navbar-left">
+    <div class="input-group d_search_group">
+   @using (Html.BeginForm("Index", "Search", FormMethod.Post))
+   {
+    <div class="input-group d_search_group">
+        <input type="text" name="Keyword" id="Keyword" class="form-control" aria-label="Text input with segmented button dropdown" placeholder="Search for event, channel or user" style="width: 250px;">
+        <div class="input-group-btn">
+            <button class="btn btn-default d_btn_search" type="submit">
+                <span class="glyphicon glyphicon-search"></span>
+            </button>
+            <button type="button" class="btn btn-default " data-toggle="modal" data-target="#i_md_ad_search" id="i_advanced_search">
+                <a href="#" id="i_advanced_search">
+                    <span class="glyphicon glyphicon-zoom-in"></span>
+                </a>
+            </button>
+            <a href="@Url.Action("Index","LookAround")" class="btn btn-success">
+                <span class="glyphicon glyphicon-map-marker"></span>
+            </a>
+        </div>
+    </div>
+   }
+    </div>
+</div>
+<div class="modal fade" id="i_md_ad_search" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal 1 content: Advanced Search -->
+        <div class="panel panel-info ">
+            <div class="panel-heading">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <div class="panel-title">Advanced Search</div>
+            </div>
+            <div class="panel-body">
+                <!-- md_ đánh dấu CSS của MODAL -->
+                @Html.Partial("_AdvanceSearchPartial", new AdvanceSearch())
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    // Geolocation get current location for lookAround
+    //var lookAround = function () {
+    //    navigator.geolocation.getCurrentPosition(function (position) {
+    //        $("#lookaround-btn").attr("href", $("#lookaround-btn").attr("href") + "longitude=" + position.coords.longitude + "&latitude=" + position.coords.latitude);
+    //    });
+    //};
+    //$(function () {
+    //    $("#lookaround-btn").click(function (evt) {
+    //        if ($(this).attr("href").slice(-1) == "?") {
+    //            swal({
+    //                title: "Oops...",
+    //                text: "You are not allowing getting location! Please allow us to get current location.",
+    //                type: "warning",
+    //                showCancelButton: false,
+    //                confirmButtonColor: "#DD6B55",
+    //                confirmButtonText: "OK!",
+    //                closeOnConfirm: true,
+    //                closeOnCancel: false
+    //            }, function (isConfirm) {
+    //                if (isConfirm) {
+    //                    lookAround();
+    //                }
+    //            });
+    //            return false;
+    //        }
+    //    });
+    //    lookAround();
+    //});
+    //$("#btn-search-basic").click(function () {
+       
+    //    $.ajax({
+    //        url: "/Search/Index",
+    //        type: "post",
+    //        dataType: "json",
+    //        data: { keyword: $("#Keyword").val() },
+    //        success: function (data) {
+    //            console.log("done")
+    //        },
+    //        error: function () {
+    //            errorShow("Error","Failed to connect with server!")
+    //        }
+    //    })
+    //})
+
+</script>

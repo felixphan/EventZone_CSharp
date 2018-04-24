@@ -1,0 +1,177 @@
+﻿@using EventZone.Models
+@using EventZone.Helpers
+
+@{
+
+    List<ViewThumbEventModel> listEventThum = TempData["ListEventThumb"]as List<ViewThumbEventModel>;
+    List<User> listFollowingUser = TempData["ListFollowing"] as List<User>;
+    List<User> listFollower = TempData["ListFollower"] as List<User>;
+    int countFollowingUser= listFollowingUser==null?0:listFollowingUser.Count;
+    int countEvent = listEventThum==null?0:listEventThum.Count;
+    int countFollower = listFollower == null ? 0 : listFollower.Count;
+    var viewingUser =  TempData["ViewingUser"] as User;
+    var signInUser= UserHelpers.GetCurrentUser(Session);
+    var isOwned= false;
+    if(signInUser!=null&&signInUser.UserID==viewingUser.UserID){
+        isOwned=true;
+    }
+    
+    
+}
+    <!-- ump_ đánh dấu CSS thuộc về USER MANAGE PROFILE -->
+    <div id="result-list" class="panel-group d_follow_item_cover">
+            <div class="panel panel-default">
+                <div class="panel-heading d_panel_1">
+                    <h4 class="panel-title">
+                        <!-- fl_ đánh dấu CSS FOLLOW -->
+                        <a href="#i_fl_event" data-toggle="collapse" data-parent="#result-list" class="" aria-expanded="true">
+                            Following Event(<span class="" id="count-following-event">@countEvent</span>)
+                        </a>
+                    </h4>
+                </div>
+                <div id="i_fl_event" class="panel-collapse collapse in scroll-content" aria-expanded="true">
+                    @if (countEvent != 0)
+                    {
+                        foreach (var item in listEventThum)
+                        {
+                            <div class="d_each_event" id="event-@item.evt.EventID">
+                                <div class="d_thumb">
+                                    <img src="@EventDatabaseHelper.Instance.GetImageByID(item.evt.Avatar).ImageLink">
+                                </div>
+                                <div class="d_info">
+                                    <div class="d_title">
+                                        @Html.ActionLink(@item.evt.EventName,"Details","Event",new{id=@item.evt.EventID},new{target="_blank"}) 
+                                    </div>
+                                    <div class="d_time">
+                                        <span class="glyphicon glyphicon-time"></span>From @item.evt.EventStartDate to @item.evt.EventEndDate
+                                    </div>
+                                    <div class="d_location">
+                                        <span class="glyphicon glyphicon-map-marker"></span>@item.location[0].LocationName
+                                    </div>
+                                </div>
+                                @if (isOwned)
+                                {
+                                    <button onclick="UnfollowEvent(@item.evt.EventID)" class="btn btn-default btn-xs d_btn_follow">Unfollow</button>
+                                }
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4 class="panel-title">
+                        <a href="#i_fl_user" data-toggle="collapse" data-parent="#result-list" class="collapsed" aria-expanded="false">
+                            Following User(<span class="xxx" id="count-following-user">@countFollowingUser</span>)
+                        </a>
+                    </h4>
+                </div>
+                <div id="i_fl_user" class="panel-collapse collapse scroll-content" aria-expanded="false" style="height: 0px;width:100%">
+                    @if (listFollowingUser != null)
+                    {
+                        for (int i = 0; i < listFollowingUser.Count; i++)
+                        {
+                            User eachUser = listFollowingUser[i];
+                            <div class="d_each_user" id="following-user-@eachUser.UserID">
+                                <div class="d_thumb">
+                                    <img src="@EventDatabaseHelper.Instance.GetImageByID(eachUser.Avartar).ImageLink">
+                                </div>
+                                <div class="d_info">
+                                    <div class="d_name">
+                                        @Html.ActionLink(@eachUser.UserName, "Index", "User", new { userID = @eachUser.UserID }, new { target = "_blank" })
+                                    </div>
+                                    <!-- u_ đánh dấu CSS của User -->
+                                    <div class="d_fill_in">Number Event: <a href=""><i>@UserDatabaseHelper.Instance.CountOwnedEvent(eachUser.UserID)</i></a></div>
+                                    <div class="d_fill_in">Follower: <a href=""><i>@UserDatabaseHelper.Instance.NumberFollower(eachUser.UserID)</i></a></div>
+                                    <div class="d_fill_in" id="email-display-@eachUser.UserID">Email: @eachUser.UserEmail</div>
+                                </div>
+                                @if (isOwned)
+                                {
+                                    <button onclick="UnfollowUser(@eachUser.UserID)" class="btn btn-default btn-xs d_btn_follow">Unfollow</button>
+                                }
+                                
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4 class="panel-title">
+                        <a href="#i_fling_user" data-toggle="collapse" data-parent="#result-list" class="collapsed" aria-expanded="false">
+                            <span class="xxx">Followers(@countFollower)</span>
+                        </a>
+                    </h4>
+                </div>
+                <div id="i_fling_user" class="panel-collapse collapse scroll-content" aria-expanded="false" style="height: 0px;width:100%">
+                    @if (listFollower != null)
+                    {
+                        for (int i = 0; i < listFollower.Count; i++)
+                        {
+                            User eachUser = listFollower[i];
+                            <div class="d_each_user">
+                                <div class="d_thumb">
+                                    <img src="@EventDatabaseHelper.Instance.GetImageByID(eachUser.Avartar).ImageLink">
+                                </div>
+                                <div class="d_info">
+                                    <div class="d_name">
+                                        @Html.ActionLink(@eachUser.UserName, "Index", "User", new { userID = @eachUser.UserID }, new { target = "_blank" })
+                                    </div>
+                                    <div class="d_fill_in">Number Event: <a href=""><i>@UserDatabaseHelper.Instance.CountOwnedEvent(eachUser.UserID)</i></a></div>
+                                    <div class="d_fill_in">Follower: <a href=""><i>@UserDatabaseHelper.Instance.NumberFollower(eachUser.UserID)</i></a></div>
+                                    <div class="d_fill_in" id="email-display-@eachUser.UserID">Email: @eachUser.UserEmail</div>
+                                </div>
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+
+        </div>
+
+    <!-- All script here -->
+    <!-- Default JQuery -->
+    @*<script type="text/javascript" src="../Scripts/jquery-2.1.4.js"></script>*@
+    <!-- Default Bootstrap -->
+    @*<script type="text/javascript" src="../Scripts/bootstrap.min.js"></script>*@
+
+<script>
+    function UnfollowEvent(eventID) {
+        $.ajax({
+            url: "/User/FollowEvent",
+            type: "post",
+            dataType: "json",
+            data: { eventId: eventID },
+            success: function (data) {
+                if (data.success) {
+                    $("#event-" + eventID).remove();
+                    $("#count-following-event").text(parseInt($("#count-following-event").text())-1)
+                }
+            },
+            errpr: function () {
+                 errorShow("Error","Failed to connect with server!")
+            }
+        })
+    }
+
+    function UnfollowUser(userID) {
+        $.ajax({
+            url: "/User/UnFollowUser",
+            type: "post",
+            dataType: "json",
+            data: { userID: userID },
+            success: function (data) {
+                if (data.state==1) {
+                    $("#following-user-" + userID).remove();
+                    $("#count-following-user").text(parseInt($("#count-following-user").text())-1)
+                }
+            },
+            errpr: function () {
+                errorShow("Error","Failed to connect with server!")
+            }
+        })
+    }
+
+</script>

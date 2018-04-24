@@ -1,0 +1,53 @@
+﻿@using EventZone.Models
+@using EventZone.Helpers
+@model EventZone.Models.Category
+@{
+    Category item = Model as Category;
+    User user = UserHelpers.GetCurrentUser(Session);
+}
+<p id="i_txt">New Events, Followers, Live Streaming for today!</p>
+<div class="d_stat_cover">
+    <div class="d_stat">
+        <div class="glyphicon glyphicon-bookmark">
+        </div>
+        <div class="d_data">
+            @CommonDataHelpers.Instance.CountNewEventByCategory(item.CategoryID)
+        </div>
+    </div>
+    <div class="d_stat">
+        <div class="glyphicon glyphicon-user">
+        </div>
+        <div class="d_data">
+            <span id="number-follower-category-@item.CategoryID">
+                @CommonDataHelpers.Instance.CountFollowerByCategory(item.CategoryID)
+            </span>
+        </div>
+    </div>
+    <div class="d_stat" id="followCount+@item.CategoryID">
+        <div class="glyphicon glyphicon-facetime-video">
+        </div>
+        <div class="d_data">
+            @CommonDataHelpers.Instance.CountLiveEventByCategory(item.CategoryID)
+        </div>
+    </div>
+    <div class="d_follow_cate">
+        <button type="button" class="btn btn-default btn-md d_btn_follow" onclick="followCategory(this.value)" id="btn-follow-category-@item.CategoryID" value="@item.CategoryID">
+            <span class="glyphicon glyphicon-star-empty" aria-hidden="true"></span>
+            <span class="categoryText" id="follow-category-@item.CategoryID-status">
+                @if (user != null && UserDatabaseHelper.Instance.IsFollowingCategory(user.UserID, item.CategoryID))
+                {
+                    <text>
+                        Following
+                    </text>
+                }
+                else
+                {
+                    <text>
+                        Follow
+                    </text>
+                }
+            </span>
+        </button>
+    </div>
+</div>
+

@@ -1,0 +1,1267 @@
+﻿@model EventZone.Models.ViewDetailEventModel
+@using System.Collections.Generic
+@using System.Linq
+@using Amazon.EC2.Model
+@using EventZone.Models
+@using EventZone.Helpers
+@{
+    User user = UserHelpers.GetCurrentUser(Session);
+    User authorEvent = EventDatabaseHelper.Instance.GetAuthorEvent(Model.eventId);
+    var task = ViewData["EventDetailTask"];
+    int numberImage = 0;
+    if (Model != null && Model.eventImage != null && Model.eventImage.Count != 0)
+    {
+        numberImage = Model.eventImage.Count;
+    }
+    int numberVideoNormal = 0;
+    int numberVideoLive = 0;
+    if (Model != null && Model.eventVideo.Count != 0)
+    {
+        foreach (var video in Model.eventVideo)
+        {
+            if (EventDatabaseHelper.Instance.IsLiveVideo(video))
+            {
+                numberVideoLive++;
+            }
+        }
+        numberVideoNormal = Model.eventVideo.Count - numberVideoLive;
+    }
+
+    int userLikeEvent = Model.FindLike.Type;
+    int numberLike = Model.NumberLike;
+    int numberDislike = Model.NumberDisLike;
+    int numberFollow = Model.NumberFowllower;
+    ViewBag.Title = Model.eventName;
+    LiveStreamingModel LiveModel = new LiveStreamingModel { eventID = Model.eventId, Title = Model.eventName };
+}
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- BOOTSTRAP social -->
+<link href="~/Content/Event/bootstrap-social.css" rel="stylesheet" />
+
+<link href="~/Content/Event/bootstrap-datetimepicker.min.css" rel="stylesheet" />
+<!-- myCSS -->
+<link href="~/Content/Event/myCSS_u_w_e.css" rel="stylesheet" />
+<link href="~/Content/Event/myCSS_edit_event.css" rel="stylesheet" />
+<script src="~/Scripts/Event/moment.js"></script>
+<script src="~/Scripts/Event/spinners.min.js"></script>
+<script src="~/Scripts/Event/lightview.js"></script>
+<link href="~/Content/Event/lightview.css" rel="stylesheet" />
+<script src="~/Scripts/Event/bootstrap-datetimepicker.min.js"></script>
+<script src="~/Scripts/Event/prettify-1.0.min.js"></script>
+<script src="~/Scripts/Event/jquery.hotkeys.js"></script>
+
+
+<style>
+    .btn-transparent {
+        color: white;
+        background-color: rgba(1, 1, 1, 0);
+        border-color: rgba(1, 1, 1, 0);
+        margin: -30px 0 0 5px;
+    }
+
+        .btn-transparent:hover,
+        .btn-transparent:focus {
+            color: white;
+            background-color: rgba(1, 1, 1, 0);
+            border-color: rgba(1, 1, 1, 0);
+        }
+</style>
+
+<div class="">
+    @if (Model.numberView == 0)
+    {
+        <div id="NoViewSuggestion">
+            You have 0 view. If you want to create live streaming to get viewers, click
+            <a href="#" data-toggle="modal" data-target="#modelCreateLiveStream" id="i_createLiveStream_btn" onclick="$('.field-validation-error').empty();">here</a>
+        </div>
+    }
+    <div class="d_all_function_cover">
+        <div class="col-sx-12 col-sm-12 col-md-8 col-lg-8 d_left_cover d_style_of_tabs" id="tab-menu">
+            <ul class="nav nav-tabs" id="event-tab">
+                <li class="active li-tab" id="li-event-info"><a href="#i_info_tab" data-toggle="tab">Event Info</a></li>
+                <li class="li-tab" id="li-gallery"><a href="#i_image_tab" data-toggle="tab">Gallery <span id="number-image">(@numberImage</span>)</a></li>
+                <li class="li-tab" id="li-video"><a href="#i_video_tab" data-toggle="tab">Video (@numberVideoNormal)</a></li>
+                <li class="li-tab" id="li-live-video"><a href="#i_live_vid_tab" data-toggle="tab">Live Video (@numberVideoLive)</a></li>
+                <li class="slider"></li>
+            </ul>
+            <div class="tab-content d_info_tab">
+
+                <!-- Khung ch?a Basic info & Description -->
+                <div class="tab-pane active" id="i_info_tab">
+                    <!-- THUMBNAIL -->
+                    <input id="eventID-detail" hidden value="@Model.eventId" />
+                    <div class="d_event_thumbnail">
+                        @if (Model.isOwningEvent)
+                        {
+                            <label for="btn-change-event-avatar">
+                                <img src="@Model.eventAvatar" id="i_event_thumbnail">
+                            </label>
+                            <button data-toggle="modal" data-target="#change-event-avatar-modal" class="btn btn-primary btn-xs hidden" id="btn-change-event-avatar">Upload</button>
+                            <div class="modal fade" id="change-event-avatar-modal" role="dialog">
+                                <div class="modal-dialog">
+                                    <!-- Modal content-->
+                                    <div class="panel panel-info d_margin_top">
+                                        <div class="panel-heading">
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                            <div class="panel-title">Change Event Avatar</div>
+                                        </div>
+                                        <div class="panel-body">
+                                            <div class="cover_all_functions">
+                                                <div class="tab-content">
+                                                    <!--thumb uploaded image-->
+                                                    <div class="col-md-4 col-sm-3 col-xs-4 thumb" style="width: inherit">
+                                                        <div id="image-contain"><img src="@Model.eventAvatar" id="i_event_avatar-change"></div>
+                                                    </div>
+                                                    @using (Ajax.BeginForm("ChangeEventAvatar", "Event", null, new AjaxOptions
+                                                        {
+                                                            HttpMethod = "POST",
+                                                            OnSuccess = "Onsuccess"
+                                                        }, new { enctype = "multipart/form-data", id = "ChangeEventAvatarForm" }))
+                                                    {
+                                                        <input id="new-avatar" type="file" class="upload" name="file" data-max-size="2097152" accept="image/x-png, image/gif, image/jpeg, image/bmp" />
+                                                        <input hidden name="eventID" value="@Model.eventId" />
+                                                        <p>
+                                                            <input type="submit" class="btn btn-primary btn-sm" value="Upload" />
+                                                        </p>
+                                                    }
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <img src="@Model.eventAvatar" id="i_event_thumbnail">
+                        }
+
+                    </div>
+                    <!-- DETAIL INFO -->
+                    <div class="d_event_info">
+                        <!-- TITLE -->
+                        <div id="i_event_title">
+                            <p>
+                                @Model.eventName
+                                @if (Model.isVerified)
+                                {
+                                    <img src="~/img/icon_verified.png" id="i_verify_icon" style="width: 30px;">
+                                }
+                            </p>
+
+
+
+                            <!-- DATE TIME -->
+                            <div class="col-xs-9 col-sm-9 col-md-9 col-lg-9 d_each_info">
+                                <div class="col-xs-1 col-sm-1 col-md-2 col-lg-1 glyphicon glyphicon-list">
+                                </div>
+                                <div class="col-xs-11 col-sm-11 col-md-10 col-lg-11 d_event_time">
+                                    in <i>@Model.Category</i>
+                                </div>
+                                <div class="col-xs-1 col-sm-1 col-md-2 col-lg-1 glyphicon glyphicon-user">
+                                </div>
+                                <div class="col-xs-11 col-sm-11 col-md-10 col-lg-11 d_event_time">
+                                    by <i>@Html.ActionLink(@Model.createdBy.UserName, "Index", "User", new { userID = Model.createdBy.UserID }, null)</i>
+                                </div>
+                                <div class="col-xs-1 col-sm-1 col-md-1 col-lg-1 glyphicon glyphicon-time">
+                                </div>
+                                <div class="col-xs-11 col-sm-11 col-md-10 col-lg-11 d_event_time">
+                                    From @Model.StartTime.DayOfWeek <span> @Model.EndTime.ToShortTimeString() @Model.StartTime.ToShortDateString()</span>
+                                    @if (Model.EndTime != null && Model.StartTime > Model.EndTime)
+                                    {
+                                        <span><br />To   @Model.EndTime.DayOfWeek</span>
+                                        <span>@Model.EndTime.ToShortTimeString() @Model.EndTime.ToShortDateString()</span>
+                                    }
+                                </div>
+                                <div class="col-xs-1 col-sm-1 col-md-1 col-lg-1 glyphicon glyphicon-map-marker">
+                                </div>
+                                <div class="col-xs-11 col-sm-11 col-md-10 col-lg-11 d_event_time">
+                                    @Model.eventLocation[0].LocationName
+                                </div>
+                                @if (Model.eventLocation.Count > 1)
+                                {
+                                    for (int i = 1; i < Model.eventLocation.Count; i++)
+                                    {
+                                        <div class="col-xs-11 col-sm-11 col-md-10 col-lg-11 col-xs-offset-1 col-sm-offset-1 col-md-offset-2 col-lg-offset-1 d_event_time">
+                                            @Model.eventLocation[i].LocationName
+                                        </div>
+                                    }
+                                }
+                            </div>
+                        </div>
+                    </div>
+                    <!-- BUTTONS -->
+                    <div class="d_btn_group" id="i_btn_interactive">
+                        <a class="btn btn-default btn-xs" id="btn-number-view">
+                            <i class="glyphicon glyphicon-eye-open"></i> <span id="view-count">@Model.numberView</span>
+                        </a>
+                        <a class="btn btn-default btn-xs" id="btn-like-event">
+                            <i class="glyphicon glyphicon-thumbs-up"></i> <span id="like-count">@numberLike</span>
+                        </a>
+                        <a class="btn btn-default btn-xs" id="btn-dislike-event">
+                            <i class="glyphicon glyphicon-thumbs-down"></i> <span id="dislike-count">@numberDislike</span>
+                        </a>
+                        <a class="btn btn-default btn-xs" id="btn-follow-event">
+                            <i class="glyphicon glyphicon-star-empty"></i> <span id="follow-count">@numberFollow</span>
+                        </a>
+                        <button class="btn btn-block btn-social btn-facebook btn-xs" onclick="share(@Model.eventId)">
+                            <i class="fa fa-facebook" id="facebook-share"></i> Share
+                        </button>
+                        @if (user != null)
+                        {
+                            if (user.UserID == EventDatabaseHelper.Instance.GetAuthorEvent(Model.eventId).UserID && !(user.UserRoles == EventZoneConstants.Admin || user.UserRoles == EventZoneConstants.RootAdmin ||
+                    user.UserRoles == EventZoneConstants.Mod))
+                            {
+                                <button data-toggle="modal" data-target="#modelEditEvent" class="btn btn-primary btn-xs">Edit</button>
+                            }
+                            if (user.UserRoles == EventZoneConstants.Admin || user.UserRoles == EventZoneConstants.RootAdmin ||
+                                user.UserRoles == EventZoneConstants.Mod)
+                            {
+                                <button data-toggle="modal" data-target="#modelEditEvent" class="btn btn-success btn-xs">
+                                    <i class="glyphicon glyphicon-pencil"></i> Edit
+                                </button>
+                                <div id="lockUnlockDiv-@Model.eventId">
+                                    @if (EventDatabaseHelper.Instance.GetEventByID(@Model.eventId).Status == EventZoneConstants.Active)
+                                    {
+                                        <button class="btn btn-success btn-xs" onclick="LockEvent(@Model.eventId)" id="lockUnlock-@Model.eventId">Lock</button>
+                                    }
+                                    else
+                                    {
+                                        <button class="btn btn-danger btn-xs" onclick="UnlockEvent(@Model.eventId)" id="lockUnlock-@Model.eventId">Unlock</button>
+                                    }
+                                </div>
+                            }
+                        }
+                    </div>
+                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 d_des">
+                        <div class="col-xs-4 col-sm-5 col-md-5 col-lg-5 d_deco_line">
+                        </div>
+                        <div class="col-xs-4 col-sm-2 col-md-2 col-lg-2 d_text_des">
+                            Description
+                        </div>
+                        <div class="col-xs-4 col-sm-5 col-md-5 col-lg-5 d_deco_line">
+                        </div>
+                        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 d_des_content" style="overflow-wrap: break-word">
+                            @Model.eventDescription
+                        </div>
+                        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 d_des_fade"
+                             data-toggle="modal" data-target="#i_Modal_des">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Khung ch?a Gallery -->
+                <div class="tab-pane " id="i_image_tab">
+                    <div class="d_btn_upload_pending">
+                        <button data-toggle="modal" data-target="#user-upload-image-event-modal" class="btn btn-success btn-xs">
+                            Upload
+                        </button>
+                        @if (Model.isOwningEvent)
+                        {
+                            <button type="button" class="btn btn-success btn-xs" id="btn-view-pending">
+                                Pending Images
+                            </button>
+                            <div id="pending-panel"></div>
+                        }
+                    </div>
+                    <div id="i_image_public" class="panel-collapse collapse in d_image_cover" aria-expanded="true">
+                        <div class="container-fluid d_image_cover">
+                            <div class="container-fluid d_thumbs_cover">
+                                @if (Model.eventImage != null)
+                                {
+                                    var listApprovedEvent = EventDatabaseHelper.Instance.GetEventApprovedImage(Model.eventId);
+                                    <ul class="grid cs-style-3 ">
+                                        @foreach (var item in listApprovedEvent)
+                                        {
+                                            if (item != null)
+                                            {
+                                                <li class="d_each_photo">
+
+                                                    <figure>
+                                                        <a class="lightview thumbnail" href="@item.ImageLink" data-lightview-group='imageEvent'>
+                                                            <img class="" src="@item.ImageLink" style="object-fit: cover;">
+                                                        </a>
+
+                                                        <figcaption>
+                                                            <h6>@item.User.UserName</h6>
+                                                            @if (Model.isOwningEvent)
+                                                            {
+                                                                <button type="button" class="btn btn-xs btn-default" id="delete-image" onclick="ShowDeleteImage(@item.ImageID,@Model.eventId)">Delete</button>
+                                                            }
+
+                                                            <!-- <a class="lightview thumbnail" href="@item.ImageLink" data-lightview-group='imageEvent'>Take a look</a>-->
+                                                        </figcaption>
+                                                    </figure>
+
+                                                </li>
+                                            }
+                                        }
+                                    </ul>
+                                }
+
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Khung ch?a Video -->
+                <div class="tab-pane" id="i_video_tab">
+                    <iframe src="https://www.youtube.com/embed/7lHr2ZNlULA" frameborder="0" allowfullscreen="" name="mainViewer"></iframe>
+                    <div class="d_vid_info">
+                        <span id="i_date"></span>
+                        <span id="i_user"></span>
+                        <span class="d_btn_more">More  <span class="glyphicon glyphicon-triangle-top"></span></span>
+                        <span class="d_btn_close">Close  <span class="glyphicon glyphicon-triangle-bottom"></span></span>
+                    </div>
+                    <div class="d_other_cover">
+                        @if (Model.isOwningEvent)
+                        { <div class="d_each_vid d_btn_add_vid">
+                            <a data-toggle="modal" data-target="#user-upload-video-event-modal" id="i_btn_add_vid"
+                               class="btn-transparent"><span class="glyphicon glyphicon-plus"></span>Add a video</a>
+                        </div>
+                        }
+                        @if (Model.eventVideo != null)
+                        {
+                            <ul class="grid cs-style-3 " style="padding: 0px;">
+
+                                @foreach (var video in Model.eventVideo)
+                                {
+                                    if (!EventDatabaseHelper.Instance.IsLiveVideo(video))
+                                    {
+                                        string thumbVideo = video.VideoLink.Replace("www.youtube", "img.youtube").Replace("watch?v=", "vi/") + "/default.jpg";
+                                        string url = video.VideoLink.Replace("watch?v=", "v/");
+                                        <li class="d_each_vid " style="overflow: hidden; width: auto;">
+                                            <figure>
+                                                <a href="@url" target="mainViewer">
+                                                    <img class="" src="@thumbVideo" />
+                                                </a>
+                                                <figcaption>
+                                                    @if (Model.isOwningEvent)
+                                                    {
+                                                        using (Html.BeginForm("VideoDelete", "Event", FormMethod.Post))
+                                                        {
+                                                            <input type="hidden" name="videoID" value="@video.VideoID" />
+                                                            <input type="hidden" name="eventID" value="@Model.eventId" />
+                                                            <button type="submit" class="btn btn-default btn-xs btn-transparent">Delete</button>
+                                                        }
+                                                    }
+
+                                                </figcaption>
+                                            </figure>
+                                        </li>
+                                    }
+                                }
+                            </ul>
+                        }
+                    </div>
+
+
+                    <div class="modal fade" id="user-upload-video-event-modal" role="dialog">
+                        <div class="modal-dialog">
+                            <!-- Modal content-->
+                            <div class="panel panel-info d_margin_top">
+                                <div class="panel-heading">
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                    <div class="panel-title">Add Video URL</div>
+                                </div>
+                                <div class="panel-body">
+                                    <div class="cover_all_functions">
+                                        <div class="tab-content">
+                                            @if (Model.isOwningEvent)
+                                            {
+                                                using (Html.BeginForm("VideoAdd", "Event", FormMethod.Post, new { id = "UploadVideoForm" }))
+                                                {
+                                                    <div class="row b">
+                                                        <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">Video URL*</div>
+                                                        <input type="text" class="col-xs-9 col-sm-9 col-md-9 col-lg-9" id="VideoURL" name="VideoURL" />
+                                                        <p id="formatError" style="display: none">
+                                                            We only support these formats below <br />
+                                                        </p>
+                                                    </div>
+                                                    <div class="row b">
+                                                        <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">Location</div>
+                                                        <select class="col-xs-9 col-sm-9 col-md-9 col-lg-9 form-group" name="LocationID">
+                                                            @foreach (var item in @Model.eventLocation)
+                                                            {
+                                                                <option value="@item.LocationID">@item.LocationName</option>
+                                                            }
+                                                        </select>
+                                                    </div>
+                                                    <input type="hidden" name="EventID" value="@Model.eventId" />
+                                                    <p>
+                                                        <input type="button" class="btn btn-primary btn-sm" id="submitAddVideo " value="Add" onclick="AddVideo()" />
+                                                    </p>
+                                                }
+                                            }
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Khung ch?a Live Video -->
+                <div class="tab-pane" id="i_live_vid_tab">
+                    <iframe src="https://www.youtube.com/embed/7lHr2ZNlULA" frameborder="0" allowfullscreen="" name="liveViewer"></iframe>
+                    <div class="d_vid_info">
+                        <span id="i_live_date"></span>
+                        <span class="d_btn_more">More  <span class="glyphicon glyphicon-triangle-top"></span></span>
+                        <span class="d_btn_close">Close  <span class="glyphicon glyphicon-triangle-top"></span></span>
+                    </div>
+                    <div class="d_other_cover">
+
+                        @if (user != null)
+                        {
+                            if (user.UserID == EventDatabaseHelper.Instance.GetAuthorEvent(Model.eventId).UserID)
+                            {
+                                <div class="d_each_vid d_btn_add_vid">
+                                    <button class="btn btn-primary btn-xs btn-transparent" id="btn-add-live"><span class="glyphicon glyphicon-plus"></span> Add a Streaming Video</button>
+
+                                </div>
+                            }
+                        }
+
+                        @if (Model.eventVideo != null)
+                        {
+                            <ul class="grid cs-style-3" style="padding:0">
+                                @foreach (var video in Model.eventVideo)
+                                {
+                                    if (EventDatabaseHelper.Instance.IsLiveVideo(video))
+                                    {
+
+                                        string thumbVideo = video.VideoLink.Replace("www.youtube", "img.youtube").Replace("watch?v=", "vi/") + "/default.jpg";
+                                        string url = video.VideoLink.Replace("watch?v=", "v/");
+                                        string time = video.StartTime + "-" + video.EndTime;
+                                        <li class="d_each_vid" style="overflow: hidden; width: auto;">
+
+                                            <figure>
+                                                <a href="@url" target="liveViewer" onclick="$('#i_live_date').text('@time')">
+                                                    <img class="" src="@thumbVideo" />
+                                                </a>
+                                                <figcaption>
+                                                    @if (Model.isOwningEvent)
+                                                    {
+                                                        using (Html.BeginForm("VideoDelete", "Event", FormMethod.Post))
+                                                        {
+                                                            <input type="hidden" name="videoID" value="@video.VideoID" />
+                                                            <input type="hidden" name="eventID" value="@Model.eventId" />
+                                                            <button type="submit" class="btn btn-default">Delete</button>
+                                                        }
+                                                    }
+                                                </figcaption>
+                                            </figure>
+                                        </li>
+
+                                    }
+                                }
+                            </ul>
+                        }
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="col-sx-12 col-sm-12 col-md-4 col-lg-4 d_right_cover">
+            <!-- Th? Tab Map -->
+            <div class="d_right_top d_style_of_tabs">
+                <ul class="nav nav-tabs" id="map-tab">
+                    <li class="active li-tab" role="presentation"><a href="#i_map" aria-controls="i_map" role="tab" data-toggle="tab">Map</a></li>
+                    <li class="li-tab d_trick" role="presentation"></li>
+                    <li class="slider_2"></li>
+                </ul>
+                <!-- Khung ch?a MAP -->
+                <div class="tab-content">
+                    <div role="tabpanel" class="tab-pane active" id="i_map">
+                        <div id="map-container"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Th? Tab Comment & Report -->
+            <div class="d_right_bottom d_style_of_tabs">
+                <a class="d_reopen_map">Map</a>
+                <ul class="nav nav-tabs" id="comment-tab">
+                    <li class="li-tab active"><a href="#i_comment" data-toggle="tab">Comment (30)</a></li>
+                    <li class="li-tab d_tab_report"><a href="#i_report_tab" data-toggle="tab">Report</a></li>
+                    <li class="li-tab d_trick"></li>
+                    <li class="slider_3"></li>
+                </ul>
+                <div class="tab-content">
+                    <!--comment partial-->
+                    @Html.Partial("_CommentPartial", new CommentViewModel { eventID = @Model.eventId, listComment = @Model.eventComment })
+                    <!-- Th? Tab Report -->
+                    <div class="tab-pane" id="i_report_tab">
+                        <!-- rp_ vi?t t?t c?a Report -->
+                        <div class="d_rp_before d_rp_sample">
+                            <div class="radio">
+                                <label><input type="radio" name="optradio">Sexual content</label>
+                            </div>
+                            <div class="radio">
+                                <label><input type="radio" name="optradio">Violent or repulsive content</label>
+                            </div>
+                            <div class="radio">
+                                <label><input type="radio" name="optradio">Hateful or abusive content</label>
+                            </div>
+                        </div>
+                        <div class="d_rp_before d_rp_fade">
+
+                        </div>
+                        @if (user != null && user.UserID != EventDatabaseHelper.Instance.GetAuthorEvent(Model.eventId).UserID)
+                        {
+                            if (UserDatabaseHelper.Instance.IsReportedEvent(user.UserID, Model.eventId) != null)
+                            {
+                                Report report = UserDatabaseHelper.Instance.IsReportedEvent(user.UserID, Model.eventId);
+                                <div class="d_reasons_container">
+                                    You have reported this event as @report.ReportType
+                                    <p>
+                                        at @report.ReportDate<br>.<a href="" data-toggle="modal" data-target="#all-report-@Model.eventId--1">View Status</a>
+                                    </p>
+                                    @Html.Action("ViewReport", "User", new { eventID = Model.eventId, type = -1, userID = user.UserID })
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="d_reasons_container">
+
+
+                                    @foreach (var item in CommonDataHelpers.Instance.GetAllReportType())
+                                    {
+                                        <div class="radio">
+                                            <label><input type="radio" name="reportRadio" value=@item.ReportTypeID>@item.ReportTypeName</label>
+                                        </div>
+                                    }
+
+                                    <div class="form-group d_write_report">
+                                        <input type="text" id="i_report_box"
+                                               class="form-control" rows="1"
+                                               placeholder="Write your reason..." maxlength="100" />
+                                        <button type="button" class="btn btn-success" id="btn-report-send">
+                                            <span class="glyphicon glyphicon-send"></span>
+                                        </button>
+                                    </div>
+                                </div>
+                            }
+                        }
+                        else if (user == null || user.UserID != EventDatabaseHelper.Instance.GetAuthorEvent(Model.eventId).UserID)
+                        {
+                            <div class="d_reasons_container">
+
+
+                                @foreach (var item in CommonDataHelpers.Instance.GetAllReportType())
+                                {
+                                    <div class="radio">
+                                        <label><input type="radio" name="reportRadio" value=@item.ReportTypeID>@item.ReportTypeName</label>
+                                    </div>
+                                }
+
+                                <div class="form-group d_write_report">
+                                    <textarea id="i_report_box"
+                                              class="form-control" rows="1"
+                                              placeholder="Write your reason..."></textarea>
+                                    <button type="button" class="btn btn-success" id="btn-report-send">
+                                        <span class="glyphicon glyphicon-send"></span>
+                                    </button>
+                                </div>
+                            </div>
+
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ALL MODALS HERE -->
+<!--Delete Image Modal-->
+<div class="modal fade" id="confirm-delete-image-modal" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="panel panel-info d_margin_top">
+            <div class="panel-heading">
+                <div class="panel-title">Delete</div>
+                <div style="float: right; font-size: 80%; position: relative; top: -17px">
+                    <a href="#" data-dismiss="modal" id="i_close_modal">Close</a>
+                </div>
+            </div>
+            <div class="panel-body">
+                <div class="cover_all_functions">
+                    <div class="tab-content">
+                        Do you really want to delete this image ?
+                        <button class="btn btn-primary btn-xs" id="btn-yes-delete" onclick="DeleteImage();">Yes</button>
+                        <button class="btn btn-primary btn-xs" id="btn-no-delete" data-dismiss="modal">No</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Modal EVENT DESCRIPTION: ph?n popup hi?n ra -->
+<div class="modal fade" id="i_Modal_des" role="dialog">
+    <div class="modal-dialog">
+
+        <!-- Modal Description content: g?m tên & Ph?n Description -->
+        <div class="panel panel-info">
+            <div class="panel-heading">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <div class="panel-title">@Model.eventName</div>
+            </div>
+            <div style="padding-top:10px" class="panel-body">
+                <div id="popupContent" style="overflow-wrap: break-word;">
+                    @Model.eventDescription
+                </div>
+            </div>
+        </div>
+
+        <!-- Iframe m?i
+        <iframe src="t_m_modal_ad_search.html"></iframe> -->
+    </div>
+</div>
+
+<!-- Modal Create Live Stream -->
+<div class="modal fade" id="modelCreateLiveStream" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="panel panel-info d_margin_top">
+            <div class="panel-heading">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <div class="panel-title">Create Live Streaming</div>
+            </div>
+            <div class="panel-body">
+                <div class="cover_all_functions">
+                    <div class="tab-content" id="add-live-stream">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Edit Event -->
+<div class="modal fade d_modal_edit_event" id="modelEditEvent" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="panel panel-info d_margin_top">
+            <div class="panel-heading">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <div class="panel-title">Edit Event</div>
+
+            </div>
+            <div class="panel-body">
+                <div class="cover_all_functions">
+                    <div class="tab-content">
+                        @Html.Action("EditEvent", "Event", new { eventID = @Model.eventId })
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--upload modal-->
+<div class="modal fade" id="user-upload-image-event-modal" role="dialog">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="panel panel-info d_margin_top">
+            <div class="panel-heading">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <div class="panel-title">Upload Image</div>
+
+            </div>
+            <div class="panel-body">
+                <div class="cover_all_functions">
+                    <div class="tab-content">
+                        <!--thumb uploaded image-->
+                        <div class="col-md-4 thumb">
+                            <div id="image-contain"></div>
+                        </div>
+                        @using (Html.BeginForm("ImageUpload", "Event", FormMethod.Post, new { enctype = "multipart/form-data", id = "UploadImageForm" }))
+                        {
+                            <input id="uploadBtn" type="file" class="upload" name="file" data-max-size="10485760" accept="image/x-png, image/gif, image/jpeg, image/bmp" />
+                            <input hidden name="eventID" value="@Model.eventId" />
+                            <p>
+                                <input type="submit" class="btn btn-primary btn-sm" value="Upload" />
+                            </p>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<script src="https://maps.googleapis.com/maps/api/js?signed_in=true&libraries=places&callback=init_map"
+        async defer></script>
+<script src="~/Scripts/Event/jquery-migrate-1.2.1.js"></script>
+<script src="~/Scripts/Event/jquery.transform.js"></script>
+<script src="~/Scripts/shareFacebook.js"></script>
+<script src="~/Scripts/Event/myJS_u_w_e.js"></script>
+<!--Delete Image-->
+
+<script>
+
+
+    function Onsuccess(data) {
+        console.log("done")
+    }
+
+
+</script>
+<script>
+    var imageDeleteIDTmp, eventIDTmp;
+    function ShowDeleteImage(imageID, eventID) {
+        imageDeleteIDTmp = imageID;
+        eventIDTmp = eventID;
+        $('#confirm-delete-image-modal').modal('show');
+    }
+    function DeleteImage() {
+        $.ajax({
+            url: "/Event/ImageDelete",
+            type: "POST",
+            dataType: "json",
+            data: { imageID: imageDeleteIDTmp, eventID: eventIDTmp },
+            success: function (data) {
+                if (data.state == 0) {
+                    errorShow(data.error, data.message)
+                } else {
+                    var elem = document.getElementById('image-' + imageDeleteIDTmp);
+                    elem.parentNode.removeChild(elem);
+                    $('#confirm-delete-image-modal').modal('hide');
+                    var number = $("#number-image").text() - 1
+                    $("#number-image").text(number);
+                }
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log(jqXHR);
+                console.log(textStatus);
+                console.log(errorThrown);
+            }
+        });
+    }
+</script>
+
+<script>
+    $(window).load(function () {
+        $('#ConfirmCreateLive').modal('show');
+        // $(".enscroll-track").parents('div').css("margin-left", "-60px");
+    });
+</script>
+<!--like+share+follow-->
+<script>
+    $("#delete-image").click(function () {
+        $("#confirm-delete-image-modal").modal("show");
+    })
+    $("#delete-image").click(function () {
+        $("#confirm-delete-image-modal").modal("show");
+    })
+    $("#btn-report-send").click(function () {
+        @if (user == null)
+        {
+            <text>
+        errorShow("Require SignIn", "Let's sign in to report event!");
+        </text>
+        }
+        else
+        {
+            <text>
+        if ($("input[name='reportRadio']:checked").val() == null) {
+            errorShow("Error", "Please select a type of report!");
+        } else {
+            $.ajax({
+                url: "/User/ReportEvent",
+                type: "POST",
+                dataType: "json",
+                data: { eventId: '@Model.eventId', typeReport: $("input[name='reportRadio']:checked").val(), reportContent: $("#i_report_box").val() },
+                success: function (data) {
+                    if (data.state == 0) {
+                        errorShow(data.error, data.message)
+                    } else {
+                        $("#i_report_tab").empty();
+                        $("#i_report_tab").append('<div class="d_reasons_container b">' +
+                            'You have reported this event as ' + data.newReportType + ' <p> at ' + data.newReportDate + '<br> Your report is being review.</p>' +
+                        '</div>');
+                    }
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    console.log(jqXHR);
+                    console.log(textStatus);
+                    console.log(errorThrown);
+                }
+            })
+        }
+        </text>
+        }
+    })
+
+    function viewVideo(link) {
+        $("#li-video").removeClass("active");
+        $("#li-video-title").addClass("active");
+        $("#i_video_tab").removeClass("active");
+        $("#i_watch_video_tab").addClass("active");
+        link = link.replace("watch?v=", "embed/");
+        $("#i-view-video").attr("src", link);
+    }
+
+    var state = 0;
+    var followState = 0;
+    //dislike script
+    $(document).ready(function () {
+        $('.d_des_content').html($('#popupContent').text().replace(/&lt;/g, '<').replace(/&gt;/g, ">").replace(/&nbsp;/g, ''));
+        $("#btn-dislike-event").click(function () {
+            @if (user == null)
+            {
+                <text>
+            errorShow("Require Signin", "Ops.. It's look like you are current is not signed in system! Please sign in first!");
+            </text>
+            }
+            else
+            {
+                <text>
+            $.ajax({
+                type: "post",
+                url: "/User/Dislike",
+                cache: false,
+                data: { eventId: '@Model.eventId' },
+                success: function (data) {
+                    state = data.state;
+                    if (data.success == true) {
+                        if (state == 1) {
+                            $('#dislike-count').text(parseInt($('#dislike-count').text()) + 1);
+                            $('#like-count').text(parseInt($('#like-count').text()) - 1);
+                            state = -1;
+                        } else if (state == 0) {
+                            $('#dislike-count').text(parseInt($('#dislike-count').text()) + 1);
+                            state = -1;
+                        }
+                    }
+                },
+                error: function () {
+                    errorShow("Ops..Error", "Failed to connect to server!");
+                }
+
+            })
+            </text>
+            }
+        });
+
+        $("#btn-like-event").click(function () {
+            @if (user == null)
+            {
+                <text>
+
+            errorShow("Require Signin", "Ops.. It's look like you are current is not signed in system! Please sign in first!");
+            </text>
+            }
+            else
+            {
+                <text>
+            $.ajax({
+                type: "post",
+                url: "/User/Like",
+                cache: false,
+                data: { eventId: '@Model.eventId' },
+                success: function (data) {
+                    state = data.state;
+                    if (data.success == true) {
+                        if (state == -1) {
+                            $('#like-count').text(parseInt($('#like-count').text()) + 1);
+                            $('#dislike-count').text(parseInt($('#dislike-count').text()) - 1);
+                            state = 1;
+                        } else if (state == 0) {
+                            $('#like-count').text(parseInt($('#like-count').text()) + 1);
+                            state = 1;
+                        }
+                    }
+                },
+                error: function () {
+                    errorShow("Ops..Error", "Failed to connect to server!");
+                }
+            })
+            </text>
+            }
+        });
+
+        if (followState == 1) {
+            //new da follow $('#follow-status').text("Following");
+        }
+        $("#btn-follow-event").click(function () {
+            @if (user == null)
+            {
+                <text>
+            errorShow("Require Signin", "Ops.. It's look like you are current is not signed in system! Please sign in first!");
+            </text>
+            }
+            else
+            {
+                <text>
+            $.ajax({
+                url: "/User/FollowEvent",
+                type: "POST",
+                dataType: "json",
+                data: {
+                    eventID: '@Model.eventId'
+                },
+                success: function (data) {
+                    if (data.success) {
+                        if (data.state == 0) {
+                            $('#follow-count').text(parseInt($('#follow-count').text()) - 1);
+                        } else if (data.state == 1) {
+                            $('#follow-count').text(parseInt($('#follow-count').text()) + 1);
+                        }
+                    } else {
+                        alert("ops.. somthing wrong!Please try again later...");
+                    }
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    console.log(jqXHR);
+                    console.log(textStatus);
+                    console.log(errorThrown);
+                }
+            })
+            </text>
+            }
+        });
+    })
+</script>
+<!--Edit-->
+<script>
+    $(window).load(function () {
+        $('#editor').html($('.d_des_content').html());
+        $('#editor').summernote({
+            height: 300,
+            minHeight: 300,
+            maxHeight: 300,
+            toolbar: [
+                ['style', ['bold', 'italic', 'underline', 'clear', 'fontname', 'fontsize']],
+                ['font', ['strikethrough', 'superscript', 'subscript']],
+                ['color', ['color']],
+                ['para', ['ul', 'ol', 'paragraph']],
+                ['height', ['height']],
+                ['insert', ['picture', 'link', 'video', 'hr']]
+            ]
+        });
+    });
+</script>
+
+<!--upload image event-->
+<script>
+    var fileInput = $('#uploadBtn');
+    var newAvatar = $('#new-avatar');
+
+    $("#new-avatar").change(function (event) {
+
+        @if(user==null) {
+           <text>
+        $("#user-upload-image-event-modal").modal("hide")
+        errorShow("Require Signin", "Ops.. It's look like you are current is not signed in system! Please sign in first!");
+        //@*Prevent this form from being submitted*@
+        event.preventDefault();
+        return false;
+        </text>
+       }else{
+           <text>
+        if (newAvatar.get(0).files.length) {
+            var fileSize = newAvatar.get(0).files[0].size; // in bytes
+            if (fileSize > 2097152) {
+                $(".modal").modal("hide");
+                errorShow("File too large", "Image size must be less than 2Mb!")
+                event.preventDefault();
+                return false;
+            } else {
+                return true;
+            }
+        } else {
+            $(".modal").modal("hide");
+            errorShow("File is empty", "Please choose a image file!");
+            event.preventDefault();
+            return false;
+        }
+        </text>
+    }
+    });
+
+
+    $("#uploadBtn").change(function (event) {
+        @if(user==null) {
+            <text>
+        $("#user-upload-image-event-modal").modal("hide")
+        errorShow("Require Signin", "Ops.. It's look like you are current is not signed in system! Please sign in first!");
+        //@*Prevent this form from being submitted*@
+        event.preventDefault();
+        return false;
+        </text>
+        }else{
+        <text>
+        if (fileInput.get(0).files.length) {
+            var fileSize = fileInput.get(0).files[0].size; // in bytes
+            if (fileSize > 2097152) {
+                $(".modal").modal("hide");
+                errorShow("File too large", "Image size must be less than 2Mb!")
+                event.preventDefault();
+                return false;
+            } else {
+                return true;
+            }
+        } else {
+            $(".modal").modal("hide");
+            errorShow("File is empty", "Please choose a image file!");
+            event.preventDefault();
+            return false;
+        }
+        </text>
+        }
+    });
+    function handleFileSelect(evt) {
+        var files = evt.target.files; // FileList object
+
+        // Loop through the FileList and render image files as thumbnails.
+        for (var i = 0, f; f = files[i]; i++) {
+
+            // Only process image files.
+            if (!f.type.match('image.*')) {
+                continue;
+            }
+
+            var reader = new FileReader();
+
+            // Closure to capture the file information.
+            reader.onload = (function (theFile) {
+                return function (e) {
+                    // Render thumbnail.
+                    $("#image-contain").empty();
+                    var span = document.createElement('span');
+                    span.innerHTML = ['<img style="height:auto;width:100%" src="', e.target.result,
+                        '" title="', escape(theFile.name), '"/>'].join('');
+                    document.getElementById('image-contain').insertBefore(span, null);
+                };
+            })(f);
+
+            // Read in the image file as a data URL.
+            reader.readAsDataURL(f);
+        }
+    }
+    document.getElementById('uploadBtn').addEventListener('change', handleFileSelect, false);
+    document.getElementById('new-avatar').addEventListener('change', handleFileSelect, false);
+</script>
+
+<!--Show map-->
+<script>
+    var index = 0;
+    /*** OUTSOURCE: Google Map ***/
+    /*** OUTSOURCE: Google Map ***/
+    function init_map() {
+        var var_location = new google.maps.LatLng('@Model.eventLocation[0].Latitude', '@Model.eventLocation[0].Longitude');
+        var var_mapoptions = {
+            center: var_location,
+            zoom: 9
+        };
+        var var_map = new google.maps.Map(document.getElementById("map-container"),
+            var_mapoptions);
+
+        @if(Model.eventLocation!=null){
+        foreach (var item in @Model.eventLocation) {
+            <text>
+        index = index + 1;
+        (function (index) {
+            var marker = new google.maps.Marker({
+                position: new google.maps.LatLng('@item.Latitude', '@item.Longitude'),
+                map: var_map
+            });
+            var infoMarker = new google.maps.InfoWindow({
+                content: '@item.LocationName'
+            });
+            marker.setMap(var_map);
+            google.maps.event.addListener(marker, 'mouseover', function () {
+                infoMarker.open(var_map, marker);
+            });
+            google.maps.event.addListener(marker, 'mouseout', function () {
+                infoMarker.close();
+            });
+        })(index);
+        </text>
+        }
+        }
+    }
+    google.maps.event.addDomListener(window, 'load', init_map);
+    //document.addEventListener('DOMContentLoaded', init_map);
+    /*** End of OUTSOURCE: Google Map ***/
+</script>
+<script>
+    function youtubeVideoValid(url) {
+        var p = /^(?:https?:\/\/)?(?:www\.)?(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))((\w|-){11})(?:\S+)?$/;
+        return (url.match(p)) ? RegExp.$1 : false;
+    }
+
+    $('#VideoURL').bind("change keyup input", function () {
+        var url = $('#VideoURL').val();
+        if (youtubeVideoValid(url) !== false) {
+            $('#formatError').hide();
+        } else {
+            $('#formatError').show();
+        }
+        function AddVideo() {
+            var url = $('#VideoURL').val();
+            if (youtubeVideoValid(url) !== false) {
+                $('#formatError').hide();
+                $('#UploadVideoForm').submit();
+            }
+        }
+
+    });
+</script>
+
+<!-- Slider cho Event-tab -->
+<script>
+    $("#event-tab li").click(function (e) {
+        if ($(this).hasClass('slider')) {
+            return;
+        }
+        var whatTab = $(this).index();
+        var howFar = 150 * whatTab;
+        $(".slider").css({
+            left: howFar + "px"
+        });
+        $(".ripple").remove();
+        var posX = $(this).offset().left,
+            posY = $(this).offset().top,
+            buttonWidth = $(this).width(),
+            buttonHeight = $(this).height();
+        $(this).prepend("<span class='ripple'></span>");
+        if (buttonWidth >= buttonHeight) {
+            buttonHeight = buttonWidth;
+        } else {
+            buttonWidth = buttonHeight;
+        }
+        var x = e.pageX - posX - buttonWidth / 2;
+        var y = e.pageY - posY - buttonHeight / 2;
+        $(".ripple").css({
+            width: buttonWidth,
+            height: buttonHeight,
+            top: y + 'px',
+            left: x + 'px'
+        }).addClass("rippleEffect");
+    });
+</script>
+
+<!-- Slider cho Map-tab -->
+<script>
+    $("#map-tab li").click(function (e) {
+        if ($(this).hasClass('slider')) {
+            return;
+        }
+        var whatTab = $(this).index();
+        var howFar = 160 * whatTab;
+        $(".slider_2").css({
+            left: howFar + "px"
+        });
+        $(".ripple").remove();
+        var posX = $(this).offset().left,
+            posY = $(this).offset().top,
+            buttonWidth = $(this).width(),
+            buttonHeight = $(this).height();
+        $(this).prepend("<span class='ripple'></span>");
+        if (buttonWidth >= buttonHeight) {
+            buttonHeight = buttonWidth;
+        } else {
+            buttonWidth = buttonHeight;
+        }
+        var x = e.pageX - posX - buttonWidth / 2;
+        var y = e.pageY - posY - buttonHeight / 2;
+        $(".ripple").css({
+            width: buttonWidth,
+            height: buttonHeight,
+            top: y + 'px',
+            left: x + 'px'
+        }).addClass("rippleEffect");
+    });
+</script>
+
+<!-- Slider cho Comment-tab -->
+<script>
+    $("#comment-tab li").click(function (e) {
+        if ($(this).hasClass('slider')) {
+            return;
+        }
+        var whatTab = $(this).index();
+        var howFar = 130 * whatTab;
+        $(".slider_3").css({
+            left: howFar + "px"
+        });
+        $(".ripple").remove();
+        var posX = $(this).offset().left,
+            posY = $(this).offset().top,
+            buttonWidth = $(this).width(),
+            buttonHeight = $(this).height();
+        $(this).prepend("<span class='ripple'></span>");
+        if (buttonWidth >= buttonHeight) {
+            buttonHeight = buttonWidth;
+        } else {
+            buttonWidth = buttonHeight;
+        }
+        var x = e.pageX - posX - buttonWidth / 2;
+        var y = e.pageY - posY - buttonHeight / 2;
+        $(".ripple").css({
+            width: buttonWidth,
+            height: buttonHeight,
+            top: y + 'px',
+            left: x + 'px'
+        }).addClass("rippleEffect");
+    });
+</script>
+<script>
+    //show modal pending image
+    $("#btn-view-pending").click(function () {
+        $.ajax({
+            url: "/Event/ShowPendingImage",
+            type: "post",
+            dataType: "html",
+            data: { eventID: '@Model.eventId' },
+            success: function (data) {
+                $("#pending-panel").html(data);
+            },
+            error: function () {
+            }
+        })
+    });
+    $("#btn-add-live").click(function () {
+        console.log("4121s")
+        $.ajax({
+            url: "/Event/AddLiveStream",
+            type: "post",
+            dataType: "html",
+            data: { eventID: '@Model.eventId', eventName: '@Model.eventName' },
+            success: function (data) {
+                $("#add-live-stream").html(data);
+                $("#modelCreateLiveStream").modal("show");
+            },
+            error: function () {
+                console.log("failed")
+            }
+        })
+    })
+</script>
+<script>
+    @if (TempData["ErrorCreateLiveMessage"]!=null&&!string.IsNullOrEmpty(TempData["ErrorCreateLiveMessage"].ToString()))
+      {
+          if (TempData["ErrorCreateLiveMessage"].ToString() != "Success")
+          {
+                <text>
+    errorShow("Error", "Your account can not create live stream. Click here to active it!")
+    </text>
+          }
+          else {
+                <text>
+    $("#success-create-live").modal('show');
+    </text>
+          }
+      }
+</script>
+
+<!--Scroll content-->

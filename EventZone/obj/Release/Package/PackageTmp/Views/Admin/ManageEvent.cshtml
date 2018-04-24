@@ -1,0 +1,393 @@
+﻿@using EventZone.Helpers
+@using EventZone.Models
+@{
+    if (EventZone.Helpers.UserHelpers.GetCurrentAdmin(Session) == null)
+    {
+        Response.Redirect("~/Admin");
+    }
+    List<Category> listCategory = CommonDataHelpers.Instance.GetAllCategory();
+    ViewBag.Title = "ManageEvent";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+<link href="~/Content/Event/perfect-scrollbar.css" rel="stylesheet" />
+<script src="~/Scripts/_Layout/jquery.slimscroll.min.js"></script>
+<style>
+.myButton {
+	-moz-box-shadow:inset 0px 0px 2px -29px #cc2288;
+	-webkit-box-shadow:inset 0px 0px 2px -29px #cc2288;
+	box-shadow:inset 0px 0px 2px -29px #cc2288;
+	background-color:#d3ebd9;
+	-moz-border-radius:17px;
+	-webkit-border-radius:17px;
+	border-radius:17px;
+	
+	display:inline-block;
+	cursor:pointer;
+	color:#ffffff;
+	font-family:Arial;
+	font-size:17px;
+	padding:7px 14px;
+	text-decoration:none;
+	text-shadow:1px 0px 20px #2f6627;
+}
+
+
+.myButton:hover {
+	background-color:#de45d4;
+}
+.myButton:active {
+	position:relative;
+	top:1px;
+}
+
+</style>
+
+
+<script src="~/Scripts/Event/perfect-scrollbar.jquery.js"></script>
+<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 interactButton row" style="margin-left: 5%; margin-bottom: 10px">
+    <input type="text" name="Keyword" id="Keyword" class="form-control col-md-3 col-lg-3" aria-label="Text input with segmented button dropdown" placeholder="Search for events" style="width: 250px; display: inline-block">
+    <button class="btn btn-default col-md-1 col-lg-1" id="btn-search">
+        <span class="glyphicon glyphicon-search"></span>
+    </button>
+    <button class="myButton col-md-1 col-lg-1" id="filter-all">All</button>
+    <button class="myButton col-md-1 col-lg-1" id="filter-locked">Locked</button>
+    <button class="myButton col-md-1 col-lg-1" id="filter-verified">Verified</button>
+    <button class="myButton col-md-1 col-lg-1" id="filter-live">Streaming</button>
+    <div class="col-md-1 col-lg-1">Sort by </div>
+    <span class="select-style col-md-1 col-lg-1">
+        <select id="sort" class="form-control" style="width: auto;">
+            <option value="default">Default</option>
+            <option value="date">Date Created</option>
+        </select>
+    </span>
+    <div class="col-md-1 col-lg-1">
+        In
+    </div>
+    <span class="select-style col-md-1 col-lg-1">
+        <select id="category" class="form-control " style="width: auto;">
+            <option value=" -1">
+                Default
+            </option>
+            @if (listCategory != null)
+            {
+                foreach (var item in listCategory)
+                {
+                    <option value="@item.CategoryID">@item.CategoryName</option>
+                }
+            }
+
+        </select>
+    </span>
+
+        <div class="row">
+            <h4>
+                <span id="number-result">
+                </span>
+            </h4>
+        </div>
+    </div>
+
+
+<div>
+    <div class="scroll-content" style="height:400px" id="event-r">
+        @Html.Action("SearchEvent", "Admin")
+    </div>
+</div>
+@Html.Partial("_DescriptionModal")
+
+<script>
+    function VerifyEvent(eventID){
+        $.ajax({
+            url: "/Admin/VerifyEvent",
+            type: "POST",
+            dataType: "json",
+            data: { eventID: eventID},
+            success: function (data) {
+                if (data.state == 0) {
+                    errorShow(data.error, data.message)
+                } else {
+                    $("#verified-icon-" + eventID).html('<img style="height:24px;width:24px;" src="../img/verifiedEvent.png">');
+                    $("#verify-panel-" + eventID).html('<a href="#" id="UnVerify-"' + eventID + 'onclick="UnVerifyEvent('+eventID+')">UnVerify</a>')
+                }
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log(jqXHR);
+                console.log(textStatus);
+                console.log(errorThrown);
+            }
+        })
+    }
+    //unverify event
+    function UnVerifyEvent(eventID) {
+        $.ajax({
+            url: "/Admin/UnVerifyEvent",
+            type: "POST",
+            dataType: "json",
+            data: { eventID: eventID },
+            success: function (data) {
+                if (data.state == 0) {
+                    errorShow(data.error, data.message)
+                } else {
+                    $("#verified-icon-" + eventID).empty();
+                    $("#verify-panel-" + eventID).html(' <a href="#" id="Verify-'+eventID+'" onclick="VerifyEvent('+eventID+')">Verify</a>')
+                }
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log(jqXHR);
+                console.log(textStatus);
+                console.log(errorThrown);
+            }
+        })
+    }
+    //show description of event
+    function showModalDescription(eventName, eventDescription) {
+        $("#event-name").empty();
+        $("#event-name").append("<p>" + eventName + "</p>");
+        $("#des-content").empty();
+        $("#des-content").append("<p>" + eventDescription + "</p>");
+        $("#i_Modal_des").modal("show");
+    }
+    ///show detail score of event
+    function showScoreDetail(eventID) {
+        $("#score-detail-modal-" + eventID).modal("show")
+    }
+    //Lock Event
+    function LockEvent(eventID) {
+        $.ajax({
+            url: "/Admin/LockEvent",
+            type: "POST",
+            dataType: "json",
+            data: { eventID: eventID, reason: "I dont want your event in my website xD" },
+            success: function (data) {
+                if (data.state == 0) {
+                    errorShow(data.error, data.message)
+                } else {
+                    $("#lock-icon-" + eventID).empty();
+                    $("#lock-icon-" + eventID).prepend('<span class="col-md-1 col-lg-1 label label-danger"><span class=" glyphicon glyphicon-lock"></span></span>')
+                    $("#lock-event-" + eventID).remove();
+                    $("#ul-lock-unlock-" + eventID).prepend('<li><a href="#" id="unlock-event-' + eventID + '" onclick="UnlockEvent(' + eventID + ')">Unlock</a></li>')
+                }
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log(jqXHR);
+                console.log(textStatus);
+                console.log(errorThrown);
+            }
+        })
+    }
+    //unlockEvent
+    function UnlockEvent(eventID) {
+        $.ajax({
+            url: "/Admin/UnlockEvent",
+            type: "POST",
+            dataType: "json",
+            data: { eventID: eventID },
+            success: function (data) {
+                if (data.state == 0) {
+                    errorShow(data.error, data.message)
+                } else {
+                    $("#lock-icon-" + eventID).empty();
+                    $("#unlock-event-" + eventID).remove();
+                    $("#ul-lock-unlock-" + eventID).prepend('<li><a href="#" id="lock-event-' + eventID + '" onclick="LockEvent(' + eventID + ')">Lock</a></li>')
+                }
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                console.log(jqXHR);
+                console.log(textStatus);
+                console.log(errorThrown);
+            }
+        })
+    }
+
+</script>
+<script>
+    var all = true;
+    var locked = false;
+    var verified = false;
+    var live = false;
+    var page = 2;
+    
+    var sort = $("#sort").val();
+    $("#sort").change(function () {
+        sort = $("#sort").val();
+        $("#event-r").empty();
+        page = 1;
+        Search();
+    })
+    var category = $("#category").val();
+    $("#category").change(function () {
+        category = $("#category").val();
+        $("#event-r").empty();
+        page = 1;
+        Search();
+    })
+
+    var keyword;
+    $("#Keyword").change(function () {
+        keyword = $("#Keyword").val();
+
+    })
+    
+    $("#filter-all").css("background", "#de45d4")
+    $("#filter-all").click(function(){
+            //mod = false;
+            //user = false;
+            locked = false;
+            verified = false;
+            live = false;
+            all = true;
+            $(".myButton").prop('disabled', false);
+            $(".myButton").css("background", "#d3ebd9")
+            $("#filter-all").css("background", "#de45d4")
+            page = 1;
+            $("#event-r").empty();
+
+            Search();
+    })
+
+
+    $("#filter-locked").click(function () {
+        if (locked) {
+            $("#filter-locked").css("background", "#d3ebd9")
+            locked = false;
+            page = 1;
+            $("#event-r").empty();
+            $(".myButton").prop('disabled', true);
+            Search();
+        }
+        else {
+            $("#filter-locked").css("background", "#de45d4")
+            locked = true;
+            $("#filter-all").css("background", "#d3ebd9")
+            all = false;
+            page = 1;
+            $(".myButton").prop('disabled', true);
+            $("#event-r").empty();
+            Search();
+        }
+    })
+
+    $("#filter-verified").click(function () {
+        if (verified) {
+            $("#filter-verified").css("background", "#d3ebd9")
+            verified = false;
+            page = 1;
+            $(".myButton").prop('disabled', true);
+            $("#event-r").empty();
+            Search();
+        }
+        else {
+            $("#filter-verified").css("background", "#de45d4")
+            verified = true;
+            $("#filter-all").css("background", "#d3ebd9")
+            all = false;
+            page = 1;
+            $(".myButton").prop('disabled', true);
+            $("#event-r").empty();
+            Search();
+        }
+    })
+    $("#filter-live").click(function () {
+        if (live) {
+            $("#filter-live").css("background", "#d3ebd9")
+            live = false;
+            page = 1;
+            $(".myButton").prop('disabled', true);
+            $("#event-r").empty();
+            Search();
+        }
+        else {
+            $("#filter-live").css("background", "#de45d4")
+            live = true;
+            $("#filter-all").css("background", "#d3ebd9")
+            all = false;
+            page = 1;
+            $(".myButton").prop('disabled', true);
+            $("#event-r").empty();
+            Search();
+        }
+    })
+  
+
+    //set time delay when press to search
+
+    var delay = (function () {
+        var timer = 0;
+        return function (callback, ms) {
+            clearTimeout(timer);
+            timer = setTimeout(callback, ms);
+        };
+    })();
+    $('#Keyword').keyup(function () {
+        delay(function () {
+            page = 1;
+            $(".myButton").prop('disabled', true);
+            $("#event-r").empty();
+            Search();
+        }, 2000);
+    });
+
+
+    //var all = true;
+    //var mod = false;
+    //var user = false;
+    //var locked = false;
+    //var verified = false;
+    //var live = false;
+
+    //var sort = $("#sort").val();
+    //$("#sort").change(function () {
+    //    sort = $("#sort").val();
+    //})
+    //var keyword = $("#Keyword");
+    function Search() {
+        $.ajax({
+            url: "/Admin/SearchEvent",
+            type: "post",
+            dataType: "html",
+            data: {keyword:keyword,all:all,locked:locked, verified:verified , live:live, sort:sort, category:category,page:page },
+            success: function (data) {
+                $(".myButton").prop('disabled', false);
+                $("#event-r").append(data);
+                page = page + 1;
+                $("#loading").remove();
+            },
+            error: function () {
+                $(".myButton").prop('disabled', false);
+            }
+        })
+    }
+    ///fade event
+
+
+  
+
+    $(document).ready(function () {
+        $('#event-r').bind('scroll', EventScroll);
+    });
+    function EventScroll(e) {
+        var elem = $(e.currentTarget);
+        if ((elem.innerHeight() + elem.scrollTop()) >= elem[0].scrollHeight&& page>=2) { 
+            Search()
+        }
+    }
+
+</script>
+<script>
+    function showScoreDetail(eventId) {
+        $.ajax({
+            url: "/Admin/ViewScore",
+            type: "post",   
+            dataType: "html",
+            data: { eventID: eventId },
+            success: function (data) {
+                $(".score").remove();
+                $("#showScore-" + eventId).append(data);
+                $("#score-detail-modal-" + eventId).modal("show");
+            },
+            error: function () {
+            }
+        })
+    }
+
+</script>

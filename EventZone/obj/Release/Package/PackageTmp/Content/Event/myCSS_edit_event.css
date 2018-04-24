@@ -1,0 +1,72 @@
+﻿/************************************************** Modal Edit Event >> Setup chung ***/				
+.d_modal_edit_event .modal-dialog{				
+    width: 90%;				
+}				
+.d_modal_edit_event .panel-body{				
+    padding: 10px;				
+    height: 500px;				
+}				
+.d_modal_edit_event .panel-body .row{				
+    padding: 0;				
+    margin: 0;				
+    margin-bottom: 10px;				
+}				
+.d_modal_edit_event .d_leftside{				
+    width: 47.5%;				
+    float: left;				
+    margin-left: 1%;				
+    height: 450px;				
+    overflow-y: auto;				
+}				
+.d_modal_edit_event .d_rightside{				
+    width: 47.5%;				
+    float: right;				
+    margin-right: 1%;				
+}				
+.d_modal_edit_event .d_criteria{				
+    width: 25%;				
+    float: left;				
+}				
+.d_modal_edit_event .d_value{				
+    width: 75%;				
+    float: left;				
+}
+
+/************************************************** Modal Edit Event >> thông tin trái ***/				
+.d_modal_edit_event .d_value .d_datetime_1{				
+    width: 55%;
+    float: left;
+    margin-bottom: 5px;				
+}				
+.d_modal_edit_event .d_value .d_datetime_2{				
+    width: 55%;
+    float: left;				
+}				
+.d_modal_edit_event .d_value .d_textbox{				
+    width: 88%;				
+    float: left;				
+}				
+.d_modal_edit_event .d_value .d_btn_plus{				
+    float: right;				
+}
+.d_modal_edit_event .LocationInput{
+    width: 100%;
+}
+.d_modal_edit_event #LocationDiv .col-lg-8,
+.d_modal_edit_event #LocationDiv .col-lg-1{
+    padding: 0;
+    margin-top: 5px;
+}
+.d_modal_edit_event #LocationDiv .col-lg-8{
+    padding-right: 4px;
+}
+.d_modal_edit_event #LocationDiv .col-lg-1{
+    text-align: right;
+}
+/************************************************** Modal Edit Event >> thông tin phải ***/			
+.d_modal_edit_event .d_rightside .d_value #i_btn_save{				
+    float: right;				
+}			
+.d_modal_edit_event .d_rightside .note-editor{
+    border: 1px solid lightgrey;
+}

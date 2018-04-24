@@ -1,0 +1,72 @@
+﻿@model EventZone.Models.GoogleAccountModel
+@{
+    ViewBag.Title = "SignUp with Google";
+}
+<h2>@ViewBag.Title.</h2>
+@using (Html.BeginForm("ExternalLoginConfirmation", "Account", FormMethod.Post, new { @id = "ConfirmGoogleForm", @class = "form-horizontal", role = "form" }))
+{
+    @Html.AntiForgeryToken()
+
+    <p class="text-info">
+        You've almost sucessfull create new account in EventZone.
+        Please enter those information for this site below and click the Register button to finish
+        logging in.
+    </p>
+    @Html.ValidationSummary()
+    ;
+    //userName
+    <div style="margin-bottom: 10px" class="input-group">
+        <span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>
+        @Html.TextBoxFor(model => model.UserName, new { @class = "form-control", @placeholder = "Username" })
+    </div>
+    @Html.ValidationMessageFor(model => model.UserName)
+    <div style="margin-bottom: 10px" class="input-group">
+        <span class="input-group-addon"><i class="glyphicon glyphicon-envelope"></i></span>
+        @Html.TextBoxFor(model => model.Email, new { @class = "form-control", @placeholder = "Email" })
+    </div>
+    @Html.ValidationMessageFor(model => model.Email)
+    <div style="margin-bottom: 10px" class="input-group">
+        <span class="input-group-addon"><i class="glyphicon glyphicon-lock"></i></span>
+        @Html.PasswordFor(model => model.Password, new { @class = "form-control", @placeholder = "Password", @id = "gg-pass" })
+    </div>
+    @Html.ValidationMessageFor(model => model.Password)
+    <div style="margin-bottom: 10px" class="input-group">
+        <span class="input-group-addon"><i class="glyphicon glyphicon-lock"></i></span>
+        @Html.PasswordFor(model => model.ConfirmPassword, new { @class = "form-control", @placeholder = "Re-enter Password", @id = "confirm-gg-pass" })
+    </div>
+    @Html.ValidationMessageFor(model => model.ConfirmPassword)
+
+    <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+        <div style="margin-bottom: 10px" class="input-group">
+            <label class="radio-inline">@Html.RadioButtonFor(m => m.Gender, 0) Male</label>
+            <label class="radio-inline">@Html.RadioButtonFor(m => m.Gender, 1) Female</label>
+            @Html.ValidationMessageFor(model => model.Gender)
+        </div>
+    </div>
+
+    <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+        <div style="margin-bottom: 10px" class="input-group">
+            <span class="input-group-addon"><i class="glyphicon glyphicon-gift"></i></span>
+            @Html.TextBoxFor(model => model.UserDOB, new { @class = "form-control", @type = "date" })
+        </div>
+        @Html.ValidationMessageFor(model => model.UserDOB)
+    </div>
+    @Html.HiddenFor(m => m.UserFirstName)
+    ;
+    @Html.HiddenFor(m => m.Place)
+    ;
+    @Html.HiddenFor(m => m.UserLastName)
+    ;
+    @Html.HiddenFor(m => m.Email)
+    ;
+
+    <div class="form-group" style="text-align: center;">
+        <input type="submit" class="btn btn-default" value="Register" />
+    </div>
+}
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}
+<script src="~/Scripts/Account/SignUpGoogle.js"></script>
+<script src="~/Scripts/jquery.md5.js"></script>

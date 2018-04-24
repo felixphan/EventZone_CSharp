@@ -1,0 +1,32 @@
+﻿@model IEnumerable<EventZone.Models.ViewThumbUserModel>
+@using EventZone.Helpers
+@{
+    var hasMore = bool.Parse(TempData["LoadMore"].ToString());
+}
+<!-- u_ để đánh dấu CSS USER -->
+@if (Model != null)
+{
+    foreach (var item in Model)
+    {
+        <div class="d_each_user">
+            <div class="d_u_avatar">
+                <img src="@EventDatabaseHelper.Instance.GetImageByID(@item.Avatar).ImageLink">
+            </div>
+            <div class="d_u_info_cover">
+                <div class="d_u_name">
+                    <b>Name: </b> @item.Name
+                </div>
+                <div class="d_u_event">
+                    <b>Total Events: </b>@item.NumberOwnedEvent
+                </div>
+                <div class="d_u_follower">
+                    <b>Total Follower: </b>@item.NumberFollower
+                </div>
+            </div>
+        </div>
+    }
+}
+@if (hasMore)
+{
+    @Html.Partial("_Loading");
+}

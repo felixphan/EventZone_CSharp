@@ -1,0 +1,362 @@
+﻿@using EventZone.Helpers
+@using EventZone.Models
+@{
+    var user = UserHelpers.GetCurrentUser(Session);
+
+    
+    List<EventZone.Models.Category> category = CommonDataHelpers.Instance.GetAllCategory();
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title - Event Zone</title>
+    <!--Style-->
+    <link href="~/Content/bootstrap.css" rel="stylesheet"/>
+    <link href="~/Content/_Layout/_Layout.css" rel="stylesheet"/>
+
+    <!--<link href="~/Content/Home/myCSS_index_2.css" rel="stylesheet"/>-->
+    <style>
+            #i_drdn_user > li > a {
+                padding: 0px;
+            }
+            @@font-face {
+             src: url('~/fonts/fontawesome-webfont.eot') format('opentype');
+            }
+    </style>
+    <!--Script-->
+    <script src="~/Scripts/_Layout/modernizr-2.8.3.js"></script>
+    <script src="~/Scripts/jquery-2.1.4.js"></script>
+    <script src="~/Scripts/_Layout/jquery-2.1.4.min.js"></script>
+    <script src="~/Scripts/ErrorAlert.js"></script>
+    <script src="~/Scripts/_Layout/bootstrap.min.js"></script>
+    <script src="~/Scripts/jquery.ajaxform.js"></script>
+    <script src="~/Scripts/_Layout/respond.js"></script>
+    <script src="~/Scripts/jquery.validate.js"></script>
+    <script src="~/Scripts/jquery.validate.unobtrusive.js"></script>
+    <script src="~/Scripts/_Layout/jquery.unobtrusive-ajax.js"></script>
+    <script src="~/Scripts/_Layout/jquery.smartmenus.js"></script>
+    <script src="~/Scripts/_Layout/jquery.smartmenus.bootstrap.js"></script>
+    <script src="~/Scripts/_Layout/enscroll-0.6.1.min.js"></script>
+    <link href="~/Content/_Layout/nprogress.css" rel="stylesheet" />
+    <script src="~/Scripts/_Layout/nprogress.js"></script>
+    <link href="~/Content/Home/webColor.css" rel="stylesheet"/>
+    <script src="~/Scripts/_Layout/_Layout.js"></script>
+    <link href="~/Content/_Layout/animate.css" rel="stylesheet" />
+
+    <script>
+        $(document).ready(function () {
+            @if (TempData["errorTitle"] != null)
+        {
+            <text>
+        errorShow('@TempData["errorTitle"]', '@TempData["errorMessage"]')
+        </text>
+        }
+        })
+    </script>
+    <script>
+        //check cookie
+        $(document).ready(function () {
+            @if (UserHelpers.GetCurrentUser(Session) == null) {
+                if(Request.Cookies["userName"]!=null&&Request.Cookies["password"]!=null){
+                    string userName= Request.Cookies["userName"].Value;
+                    string password= Request.Cookies["password"].Value;
+                    if (UserDatabaseHelper.Instance.ValidateUser(userName, password)) {
+                        user = UserDatabaseHelper.Instance.GetUserByUserName(userName);
+                          <text>
+                            $.ajax({
+                                url: "/Account/CheckCookie",
+                                type: "POST",
+                                dataType: "json",
+                                success: function (data) {
+                                    if (data.state == 0) {
+                                        alert(data.message)
+                                    } else if (data.state == 1) {
+                                        /// window.location.reload();
+                                    }
+                                },
+                                error: function (jqXHR, textStatus, errorThrown) {
+                                    console.log(jqXHR);
+                                    console.log(textStatus);
+                                    console.log(errorThrown);
+                                }
+                            })
+        </text>
+                    }
+                }
+        }
+        else if (user != null)
+        {
+            if (user.AccountStatus == EventZoneConstants.Lock) { 
+                <text>
+                $.ajax({
+                    url: "/Account/Signout",
+                    type: "POST",
+                    dataType: "html",
+                    success: function () {
+                        location.reload();
+                        errorShow("Locked Account", "Your account has been locked! Please contact with our support");
+                    },
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        console.log(jqXHR);
+                        console.log(textStatus);
+                        console.log(errorThrown);
+                    }
+                })
+                </text>
+            }
+        }
+        })
+    </script>
+
+</head>
+<body>
+    @Html.Partial("_Error")
+<!-- i_2_ đánh dấu CSS Index_2.html -->
+<!-- TOP MENU -->
+<nav class="navbar navbar-fixed-top d_topmenu_bg">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            <ul class="nav navbar-nav">
+                <li class="dropdown" id="i_drdn_brand">
+                    <a href="#" onclick="location.href = '/Home/Index'" class=" dropdown-toggle" data-toggle="dropdown" id="i_brand">Event Zone</a>
+                    <ul class="d_dropdown">
+                        <li>
+                            <a href="/Home/Policy">Policy</a>
+                        </li>
+                        <li>
+                            <a href="/Home/Help">Help</a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="dropdown" id="i_drdn_cate">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Categories <span class="caret"></span></a>
+                    <ul class="d_dropdown" style="width: 200px;">
+                        @if (category != null)
+                        {
+                            foreach (var item in category)
+                            {
+                                <li>
+                                    <a href="/Search/Category?categoryID=@item.CategoryID">@Html.DisplayFor(modelItem => item.CategoryName)</a>
+                                </li>
+                            }
+                        }
+                    </ul>
+                </li>
+            </ul>
+            @Html.Partial("_SearchPartial")
+            <ul class="nav navbar-nav navbar-right" id="SignUl">
+                @if (user == null)
+                {
+                    <li>
+                        <button data-toggle="modal" data-target="#myModal2" class="btn btn-sm d_btn_create animated infinite bounce"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span>  &nbsp Create Event</button>
+                    </li>
+                    <li>
+                        <a href="#" data-toggle="modal" data-target="#myModal2" id="i_signin_btn" onclick="clearError()">Sign In</a>
+                    </li>
+                    <div class="modal fade" id="myModal2" role="dialog">
+                        <div class="modal-dialog">
+                            <!-- Modal content-->
+                            <div class="panel panel-info">
+                                <div class="panel-heading">
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                    <div class="panel-title">Welcome to Event Zone</div>
+                                </div>
+                                <div class="panel-body">
+                                    <div class="d_style_of_tabs" id="i_slider_tab">
+                                        <ul class="nav nav-tabs">
+                                            <!-- áp dụng Tab lên thanh Nút chức năng -->
+                                            <li class="d_signin_tab active li-tab">
+                                                <a data-toggle="tab" href="#i_signin_section" id="i_signin_tab" onclick="clearError()">Sign In</a>
+                                            </li>
+                                            <li class="d_signup_tab li-tab">
+                                                <a data-toggle="tab" href="#i_signup_section" id="i_signup_tab" onclick="clearError()">Sign Up</a>
+                                            </li>
+                                            <li class="d_trick"></li>
+                                            <li class="slider_signin"></li>
+                                        </ul>
+                                        <div class="tab-content">
+                                            @Html.Action("SignIn", "Account")
+                                            @Html.Action("SignUp", "Account")
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    @Html.Action("ForgotPassword", "Account")
+                }
+                else
+                {
+                    <li>
+                        <form action="@Url.Action("Create", "Event")">
+                            <button type="submit" class="btn btn-default btn-sm d_btn_create"><span class=" glyphicon glyphicon-plus" aria-hidden="true"></span>  &nbsp Create Event</button>
+                        </form>
+                    </li>
+                    <li id="notificationList" style="height:50px">
+                        <img id="i_avatar" src="@EventDatabaseHelper.Instance.GetImageByID(@user.Avartar).ImageLink">
+                        @if (NotificationDataHelpers.Instance.CountTotalNewNotification(user.UserID) > 0)
+                        {
+                            <div id="i_noti">
+                                @NotificationDataHelpers.Instance.CountTotalNewNotification(user.UserID)
+                            </div>
+                        }
+                        <ul class="dropdown-menu sm-nowrap scroll-noti" id="notificationUl" role="group" aria-hidden="true" aria-expanded="false" style="z-index: 1;"></ul>
+    
+                    </li>
+    <li id="i_drdn_user">
+        <a href="#" class="has-submenu" aria-haspopup="true" aria-expanded="false">
+            @user.UserName <span class="caret"></span>
+        </a>
+        <ul class="d_dropdown" role="group" aria-hidden="true" aria-expanded="false">
+
+            <li>
+                <a href="@Url.Action("Index", "User")">My Profile</a>
+            </li>
+            <li>
+                <a href="@Url.Action("Event", "User")">My Events</a>
+            </li>
+
+            <li>@Html.ActionLink("Sign out", "Signout", "Account", null, new { id = "SignOutLink" })</li>
+        </ul>
+    </li>
+                }
+            </ul>
+        </div>
+    </div>
+</nav>
+
+    <div class="d_white_bg"></div>
+<div class="body-content">
+    <script src="https://maps.googleapis.com/maps/api/js?signed_in=true&libraries=places&callback=initAutocomplete"
+            async defer></script>
+    @RenderBody()
+</div>
+<script>
+    function clearError() {
+        $("#error-modal").modal('hide');
+        $('#policyError').hide();
+        $(".field-validation-error").empty();
+    }
+</script>
+<script>
+    var notifiClicked = false;
+    $('#notificationList').on('click', function (e) {
+        if (notifiClicked) {
+            notifiClicked = false;
+            if (document.getElementById("notificationUl")) {
+                document.getElementById("notificationUl").style.display = "none";
+            }
+        } else {
+            notifiClicked = true;
+            $.ajax({
+                url: "/User/NotifyDisplay",
+                type: "get",
+                datatype: "html",
+                success: function(data){
+                    $("#notificationUl").html(data)
+                    document.getElementById("notificationUl").style.display = "block";
+                },
+                error: function () {
+                    $("#notificationUl").empty()
+                }
+
+            })
+            
+        }
+    });
+
+    $(document).on('click', function (e) {
+        if (document.getElementById("notificationUl")) {
+            document.getElementById("notificationUl").style.display = "none";
+        }
+       
+        // Do whatever you want; the event that'd fire if the "special" element has been clicked on has been cancelled.
+    });
+</script>
+    <script>
+        $(document).ready(function () {
+            NProgress.start();
+
+            // Increase randomly
+            var interval = setInterval(function () { NProgress.inc(); }, 1000);
+
+            // Trigger finish when page fully loaded
+            jQuery(window).load(function () {
+                clearInterval(interval);
+                NProgress.done();
+            });
+
+            // Trigger bar when exiting the page
+            jQuery(window).unload(function () {
+                NProgress.start();
+            });
+            $('.scroll-content').enscroll({
+
+                // a configuration property
+                showOnHover: true,
+                easingDuration:200,
+                // another configuration property
+                verticalScrolling: true,
+                horizontalScrolling: true,
+                horizontalTrackClass: 'vertical-track',
+                horizontalHandleCalss: 'vertical-hanldle',
+                verticalTrackClass: 'vertical-track',
+                verticalHandleCalss: 'vertical-hanldle'
+
+                // ... more configuration properties ...
+            });
+            $(".scroll-content").width('auto');
+            $('.scroll-noti').enscroll({		
+                // a configuration property				
+                showOnHover: false,		
+                easingDuration: 200,		
+                // another configuration property				
+                verticalScrolling: true,		
+                verticalTrackClass: 'vertical-track',		
+                verticalHandleCalss: 'vertical-hanldle'		
+                // ... more configuration properties ...				
+            });		
+            $(".scroll-noti").width('auto');		
+        })		
+</script>		
+    <!-- Slider cho SignIn/SignUp tab -->		
+    <script>		
+        $("#i_slider_tab li").click(function (e) {		
+            if ($(this).hasClass('slider_signin')) {		
+                return;		
+            }		
+            var whatTab = $(this).index();		
+            var howFar = 150 * whatTab;		
+            $(".slider_signin").css({		
+                left: howFar + "px"		
+            });
+            $(".ripple").remove();
+            var posX = $(this).offset().left,
+                posY = $(this).offset().top,
+                buttonWidth = $(this).width(),
+                buttonHeight = $(this).height();
+            $(this).prepend("<span class='ripple'></span>");
+            if (buttonWidth >= buttonHeight) {
+                buttonHeight = buttonWidth;
+            } else {
+                buttonWidth = buttonHeight;
+            }
+            var x = e.pageX - posX - buttonWidth / 2;
+            var y = e.pageY - posY - buttonHeight / 2;
+            $(".ripple").css({
+                width: buttonWidth,
+                height: buttonHeight,
+                top: y + 'px',
+                left: x + 'px'
+            }).addClass("rippleEffect");
+        })
+    </script>
+@RenderSection("scripts", false)
+</body>
+</html>

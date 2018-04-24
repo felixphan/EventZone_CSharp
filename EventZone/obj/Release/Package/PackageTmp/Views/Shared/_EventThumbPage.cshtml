@@ -1,0 +1,36 @@
+﻿@model IEnumerable<EventZone.Models.ViewThumbEventModel>
+@using EventZone.Helpers
+@{
+    bool hasMore= bool.Parse(TempData["LoadMore"].ToString());
+}
+<!-- BOOTSTRAP social -->
+<link href="~/Content/Home/font-awesome.min.css" rel="stylesheet" />
+<link href="~/Content/Home/bootstrap-social.css" rel="stylesheet" />
+<!-- myCSS -->
+<link href="~/Content/Event/set1.css" rel="stylesheet" />
+
+<!-- Each event trong khung kết quả -->
+<div class="grid" style="padding-top:0px">
+    @foreach (var item in Model)
+    {
+        <figure class="d_each_event effect-ruby">
+            <!-- THUMBNAIL -->
+            <img src="@EventDatabaseHelper.Instance.GetImageByID(@item.evt.Avatar).ImageLink" id="i_event_thumbnail" alt="img13">
+            <figcaption>
+                <h3>@Html.ActionLink(@item.evt.EventName, "Details", "Event", new {id = @item.evt.EventID}, null)
+                    <br/><span class="d_icon glyphicon glyphicon-time"></span>Start: @item.evt.EventStartDate.ToShortDateString()</h3>
+                <p><span class="d_icon_info d_event_location"></span>
+                    @item.location[0].LocationName
+                    @if (item.location.Count > 1)
+                    {
+                        <text> and @item.location.GetRange(1, item.location.Count - 1).Count more localtion(s)</text>
+                    }
+                </p>
+            </figcaption>
+                   </figure>
+    }
+</div>
+@if (hasMore)
+{
+    @Html.Partial("_Loading")
+}

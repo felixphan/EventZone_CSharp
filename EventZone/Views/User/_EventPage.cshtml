@@ -1,0 +1,106 @@
+﻿@using EventZone.Models
+@using EventZone.Helpers
+@model IEnumerable<EventZone.Models.Event>
+@{
+    bool hasMore = bool.Parse(TempData["LoadMore"].ToString());
+    User user = UserHelpers.GetCurrentUser(Session);
+    User authorEvent = EventDatabaseHelper.Instance.GetAuthorEvent(Model.First().EventID);
+}
+@if (Model != null)
+{
+    foreach (var item in Model)
+    {
+        <div class="d_each_event">
+            <div class="d_thumb">
+                <img src="@EventDatabaseHelper.Instance.GetImageByID(item.Avatar).ImageLink">
+            </div>
+            <div class="d_info">
+                <div class="d_title">
+                    @Html.ActionLink(item.EventName, "Details", "Event", new {id = item.EventID}, new {target = "_blank"})
+                </div>
+                <div class="d_time_left">
+                    Start in @item.EventStartDate.ToString()
+                </div>
+            </div>
+
+            @if (user!=null&&(user.UserRoles == EventZoneConstants.Admin || user.UserRoles == EventZoneConstants.RootAdmin ||
+                    user.UserRoles == EventZoneConstants.Mod))
+            {
+                <button data-toggle="modal" data-target="#modelEditEvent-@item.EventID" class="btn btn-success btn-xs" onclick="EditCall(@item.EventID)">Edit</button>
+                <div id="lockUnlockDiv-@item.EventID">
+                    @if (item.Status == EventZoneConstants.Active)
+                    {
+                        <button class="btn btn-success btn-xs" onclick="LockEvent(@item.EventID)" id="lockUnlock-@item.EventID">Lock</button>
+                    }
+                    else
+                    {
+                        <button class="btn btn-danger btn-xs" onclick="UnlockEvent(@item.EventID)" id="lockUnlock-@item.EventID">Unlock</button>
+                    }
+                </div>
+            }
+            @if (user.UserID == authorEvent.UserID && !(user.UserRoles == EventZoneConstants.Admin || user.UserRoles == EventZoneConstants.RootAdmin ||
+                    user.UserRoles == EventZoneConstants.Mod))
+            {
+                <button data-toggle="modal" data-target="#modelEditEvent-@item.EventID" class="btn btn-success btn-xs" onclick="EditCall(@item.EventID)">Edit</button>
+            }
+            <div class="modal fade d_modal_edit_event" id="modelEditEvent-@item.EventID" role="dialog">
+                <div class="modal-dialog">
+                    <!-- Modal content-->
+                    <div class="panel panel-info d_margin_top">
+                        <div class="panel-heading">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                            <div class="panel-title">Edit Event</div>
+                        </div>
+                        <div class="panel-body">
+                            <div class="cover_all_functions">
+                                <div class="tab-content-@item.EventID">
+                                </div>
+                                <div class="d_des_content" id="content-@item.EventID" style="display: none">
+                                    @item.EventDescription
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    if (hasMore)
+    {
+        <div class="loading" id="loading" style="text-align: center; ">
+            <img src="~/img/google-loading-icon.gif" style="height:82px"/>
+            <p style="text-align: center">
+                <b>Loading more data</b>
+            </p>
+        </div>
+    }
+    <script>
+        function EditCall(eventID) {
+            $.ajax({
+                url: "/Event/EditEvent",
+                type: "GET",
+                datatype: "json",
+                data: { eventID: eventID },
+                success: function (data) {
+                    $('#content-'+eventID).html($('#content-'+eventID).text().replace(/&lt;/g, '<').replace(/&gt;/g, ">").replace(/&nbsp;/g,''));
+                    $(".tab-content-" + eventID).empty();
+                    $(".tab-content-" + eventID).append(data);
+                        $('#editor').html($('.d_des_content').html());
+                        $('#editor').summernote({
+                            height: 300,
+                            minHeight: 300,
+                            maxHeight: 300,
+                            toolbar: [
+                                ['style', ['bold', 'italic', 'underline', 'clear', 'fontname', 'fontsize']],
+                                ['font', ['strikethrough', 'superscript', 'subscript']],
+                                ['color', ['color']],
+                                ['para', ['ul', 'ol', 'paragraph']],
+                                ['height', ['height']],
+                                ['insert', ['picture', 'link', 'video', 'hr']]
+                            ]
+                        });
+                }
+            });
+        }
+    </script>
+}

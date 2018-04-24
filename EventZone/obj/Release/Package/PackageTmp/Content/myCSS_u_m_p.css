@@ -1,0 +1,479 @@
+/**************************************** USER MANAGE PROFILE ***/
+
+/**************************************** Sửa Bootstrap ***/
+.row{
+	margin: 0;
+}
+.panel-default > .panel-heading{
+	border-radius: 0px;
+	border-top-right-radius: 5px;
+	border-top-left-radius: 5px;
+}
+
+/**************************************** Decorate ***/
+.d_left_side{
+	width: 59%;
+	float: left;
+}
+#i_frame_info,
+#i_frame_schedule,
+#i_frame_follow {
+	width: 100%;
+	height: 500px;
+	border: 1px solid lightgrey;
+	border-top: 0;
+}
+.d_ump_info, 
+.d_ump_gallery,
+.d_ump_follow{
+	margin-top: 10px;
+}
+.d_label{
+	text-align: right;
+	margin-bottom: 10px;
+}
+
+/**************************************** User Info ***/
+
+/**************************************** User Info >> Hiệu ứng chạy Slider ***/
+#i_info_tab li{
+    width: 130px;
+    text-align: center;
+}
+#i_info_tab .li-tab {
+    height: 42px;
+}
+#i_info_tab .d_trick{
+    width: 300px;
+    margin-top: 42px;
+}
+/**************************************** User Info >> trên ***/
+.d_events_cover,
+.d_noti_cover,
+.d_info_tren{
+    margin-bottom: 6px;
+	height: 200px;
+	padding: 10px;
+}
+.preViewAvatar {
+  height: 260px;
+  width: 320px;
+}
+.d_info_tren .d_ava{
+	width: 160px;
+    height: inherit;
+    float: left;
+}
+#userAvatar{
+	width: 160px;
+    height: 130px;
+}
+
+#i_btn_chg_ava{
+    margin-top: 20px;
+}
+.d_info_tren .d_info{
+    width: 70%;
+    margin-left: 2%;
+    float: left;
+}
+.d_info_tren .d_info .row{
+margin: 5px 0px 5px 10px;
+}
+.d_info_tren .d_user_name{
+	font-weight: bold;
+	font-size: 17px;
+}
+.d_info_tren .row .d_icon{
+	text-align: center;
+	width: 7%;
+	float: left;
+	margin-left: 5px;
+	margin-right: 5px;
+}
+.d_info_tren .row .d_icon_info{
+	width: 90%;
+	float: left;
+}
+
+/**************************************** User Info >> dưới ***/
+.d_info_duoi{
+    height: 300px;
+	padding: 10px;
+	background-color: white;
+	border: 1px solid;
+	border-color: #DDDDDD;
+	border-radius: 5px;
+}
+#view-basic-info #i_title{
+    margin-bottom: 10px;
+    font-weight: bold;
+}
+.d_info_duoi .row {
+	margin: 0;
+}
+.d_info_duoi .row .d_criteria{
+	width: 33%;
+	float: left;
+	text-align: right;
+}
+.d_info_duoi .row .d_value{
+	width: 60%;
+	float: left;
+	margin-left: 2%;
+}
+#i_btn_edit{
+	margin-top: 10px;
+}
+
+/**************************************** Follow **/
+#i_tab_follow{
+	margin-top: 5px;
+}
+#i_tab_follow #result-list{
+	margin-top: 0px;
+    height: 492px;
+    max-height: 492px;
+}
+#i_fling_user,
+#i_fl_user,
+#i_fl_event {
+    padding: 5px;
+    height: 365px;
+    max-height: 365px;
+    overflow-y: hidden;
+}
+
+
+/**************************************** Follow > Each Event **/
+#i_fl_event .d_each_event{
+    height: 110px;
+    width: 100%;
+    border-bottom: 1px solid rgba(0, 0, 0, .075);
+    overflow-y: hidden;
+    padding: 5px;
+}
+#i_fl_event .d_thumb{
+    width: 150px;
+    height: 100px;
+    float: left;
+}
+#i_fl_event .d_thumb img{
+    width: 100%;
+    height: 100%;
+}
+#i_fl_event .d_info{
+    color: #ddd;
+    float: left;
+    width: 60%;
+    margin-left: 5px;
+}
+#i_fl_event .d_title{
+    width: 100%;
+    height: 40px;
+    max-height: 40px;
+    font-weight: bold;
+    float: left;
+    overflow-y: hidden;
+    color: blue;
+    text-decoration: none;
+}
+#i_fl_event .d_info .glyphicon{
+    margin: 0 5px;
+    color: #ddd;
+}
+#i_fl_event .d_btn_follow{
+    float: right;
+}
+/**************************************** Follow > Each User **/
+#i_fl_user .d_each_user{
+    height: 110px;
+    width: 100%;
+    border-bottom: 1px solid rgba(0, 0, 0, .075);
+    overflow-y: hidden;
+    padding: 5px;
+}
+#i_fl_user .d_thumb{
+    width: 100px;
+    height: 100px;
+    float: left;
+}
+#i_fl_user .d_thumb img{
+    width: 100%;
+    height: 100%;
+    border-radius: 5px;
+}
+#i_fl_user .d_info{
+    float: left;
+    width: 60%;
+    margin-left: 5px;
+    color: #ddd;
+}
+#i_fl_user .d_name{
+    width: 100%;
+    height: 40px;
+    max-height: 40px;
+    font-weight: bold;
+    float: left;
+    overflow-y: hidden;
+    color: blue;
+    text-decoration: none;
+}
+#i_fl_user .d_fill_in{
+    width: 100%;
+    float: left;
+    color: #ddd;
+}
+#i_fl_user .d_btn_follow{
+    float: right;
+}
+/**************************************** Follow > Each Follower **/
+#i_fling_user .d_each_user{
+    height: 110px;
+    width: 100%;
+    border-bottom: 1px solid rgba(0, 0, 0, .075);
+    overflow-y: hidden;
+    padding: 5px;
+}
+#i_fling_user .d_thumb{
+    width: 100px;
+    height: 100px;
+    float: left;
+}
+#i_fling_user .d_thumb img{
+    width: 100%;
+    height: 100%;
+    border-radius: 5px;
+}
+#i_fling_user .d_info{
+    float: left;
+    width: 60%;
+    margin-left: 5px;
+    color: #ddd;
+}
+#i_fling_user .d_name{
+    width: 100%;
+    height: 40px;
+    max-height: 40px;
+    font-weight: bold;
+    float: left;
+    overflow-y: hidden;
+    color: blue;
+    text-decoration: none;
+}
+#i_fling_user .d_fill_in{
+    width: 100%;
+    float: left;
+    color: #ddd;
+}
+#i_fling_user .d_btn_follow{
+    float: right;
+}
+
+/********************************************* Right_side **/
+/**************************************** Other Events >> Hiệu ứng chạy Slider ***/
+#i_event_tab li{
+    width: 130px;
+    text-align: center;
+}
+#i_event_tab .li-tab {
+    height: 42px;
+}
+#i_event_tab .d_trick{
+    width: 250px;
+    margin-top: 42px;
+}
+/**************************************** Other Events **/
+.d_right_side_top,
+.d_right_side_bottom{
+	float: right;
+	width: 40%;
+	margin-bottom: 10px;
+}
+.d_right_side_top .d_events_cover {
+	height: 250px;
+	padding: 10px;
+}
+.d_events_cover .d_each_event{
+	border-bottom: 1px solid #eee;
+	margin-bottom: 5px;
+	height: 65px;
+}
+.d_events_cover .d_each_event .d_thumb{
+	width: 100px;
+	float: left;
+	height: 60px;
+}
+.d_events_cover .d_each_event img{
+	float: left;
+	height: 100%;;
+	width: 100%;
+}
+.d_events_cover .d_each_event .d_title,
+.d_events_cover .d_each_event .d_time_left{
+	float: left;
+	width: 70%;
+	margin-left: 2%;
+}
+.d_events_cover .d_each_event .d_time_left{		
+	margin-left: 4%;		
+    font-size: small;		
+    font-style: italic;		
+    color: #ddd;		
+}
+.d_events_cover .d_each_event .d_title{
+	font-weight: bold;
+	font-size: 15px;
+    max-height: 45px;
+    overflow-y: hidden;
+}
+.d_events_cover .d_each_event .d_time_left{
+	color: #999;
+}
+/**************************************** Notification Area >> Hiệu ứng chạy Slider ***/
+#i_noti_tab li{
+    width: 130px;
+    text-align: center;
+}
+#i_noti_tab .li-tab {
+    height: 42px;
+}
+#i_noti_tab .d_trick{
+    width: 250px;
+    margin-top: 42px;
+}
+/**************************************** Notification Area **/
+
+.d_right_side_bottom{
+	height: 235px;
+}
+.d_right_side_bottom .d_noti_cover{
+	height: 187px;
+    overflow-wrap: break-word;
+    overflow-y: auto;
+}
+.d_each_noti{
+	border-bottom: 1px solid #eee;
+	margin-bottom: 5px;
+}
+/**************************************** ALL MODAL HERE ***/		
+/**************************************** ALL MODAL HERE >> Change password***/		
+#change-password-modal .modal-dialog{		
+    width: 30%;		
+}		
+#i_changepassword_section .input-group{		
+    margin-bottom: 5px;		
+}		
+#i_changepassword_section #i_btn_save_pwd{		
+    margin: 10px 0 0 0;		
+    text-align: center;		
+}
+/*************** Plugin Slider chạy ngang dưới tab*/
+#event-tab {
+    font-size: 0;
+    position: relative;
+    padding: 0;
+    user-select: none;
+}
+
+.li-tab {
+    display: inline-block;
+    width: 160px;
+    height: 60px;
+
+    font-size: 16px;
+    text-align: center;
+    line-height: 60px;
+    color: #fff;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.slider {
+    display: block;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 4px;
+    width: 160px;
+    background: rgb(255, 68, 0);
+    transition: all 0.5s;
+}
+.ripple {
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.4);
+    -webkit-transform: scale(0);
+    -ms-transform: scale(0);
+    transform: scale(0);
+    position: absolute;
+    opacity: 1;
+}
+
+.rippleEffect {
+    -webkit-animation: rippleDrop .6s linear;
+    animation: rippleDrop .6s linear;
+}
+/*************** END of Plugin Slider chạy ngang dưới tab*/
+
+
+/**************************************** thêm ***/
+
+/**************************************** thêm ***/
+
+/* PLUGIN SLIDER dưới chân các tabs*/
+#event-tab {
+    font-size: 0;
+    position: relative;
+    padding: 0;
+    user-select: none;
+}
+.slider {
+    display: block;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 4px;
+    width: 130px;
+    background: rgb(255, 68, 0);
+    transition: all 0.5s;
+}
+.slider_2 {
+    display: block;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 4px;
+    width: 160px;
+    background: rgb(255, 68, 0);
+    transition: all 0.5s;
+}
+.slider_3 {
+    display: block;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 4px;
+    width: 160px;
+    background: rgb(255, 68, 0);
+    transition: all 0.5s;
+}
+.ripple {
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.4);
+    -webkit-transform: scale(0);
+    -ms-transform: scale(0);
+    transform: scale(0);
+    position: absolute;
+    opacity: 1;
+}
+
+.rippleEffect {
+    -webkit-animation: rippleDrop .6s linear;
+    animation: rippleDrop .6s linear;
+}
+/* END of PLUGIN SLIDER dưới chân các tabs*/
